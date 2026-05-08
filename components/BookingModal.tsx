@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
 
@@ -8,6 +9,9 @@ type Variant = "default" | "header" | "hero";
 
 export default function BookingModal({ variant = "default" }: { variant?: Variant }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     if (!open) return;
@@ -57,17 +61,13 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
       </button>
     );
 
-  return (
-    <>
-      {trigger}
-
-      {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Book a demo"
-        >
+  const modal = (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Book a demo"
+    >
           <div
             className="absolute inset-0 backdrop-blur-sm animate-in fade-in"
             style={{ background: "rgba(12,29,43,0.85)" }}
@@ -118,7 +118,12 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
             strategy="afterInteractive"
           />
         </div>
-      )}
+  );
+
+  return (
+    <>
+      {trigger}
+      {mounted && open && createPortal(modal, document.body)}
     </>
   );
 }
