@@ -1,125 +1,151 @@
-import Script from "next/script";
-import { Calendar, Check } from "lucide-react";
+import Image from "next/image";
+import { Check, Phone, Mail } from "lucide-react";
+import BookingModal from "@/components/BookingModal";
 
 const perks = [
-  "30-minute walkthrough, built around your business",
-  "Live data pulled for the lanes you actually work",
-  "Honest answers to every question you bring",
-  "No pressure, no sales theater — just a real conversation",
+  {
+    title: "Price with confidence.",
+    body: "Low, average, and high rates across 33 commodities and 5 trailer types.",
+  },
+  {
+    title: "Defend every bid.",
+    body: "Confidence-scored benchmarks built from 14 years of settled freight.",
+  },
+  {
+    title: "Get paid what you're worth.",
+    body: "Fuel-adjusted rates with cost-per-mile baked in so you know your true margin.",
+  },
+  {
+    title: "Stay ahead of the market.",
+    body: "Regional load volume and commodity trends show where freight is heating up.",
+  },
 ];
 
 export default function Page() {
   return (
     <main className="min-h-screen flex items-center">
-      <section id="book" className="relative py-20 lg:py-28 overflow-hidden w-full">
+      <section id="book" className="relative py-16 lg:py-24 overflow-hidden w-full">
         <div className="absolute inset-0 bg-navy-950" />
         <div className="absolute inset-0 bg-radial-glow" />
         <div className="absolute inset-0 dot-grid opacity-40" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-amber-400/40 via-amber-400/10 to-transparent" />
 
-        <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
+        <div className="relative max-w-5xl mx-auto px-6 lg:px-8">
           <div className="relative rounded-3xl overflow-hidden border border-amber-400/20 shadow-2xl shadow-amber-500/10">
             <div className="absolute inset-0 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950" />
             <div className="absolute inset-0 bg-grid-light [background-size:48px_48px] opacity-30" />
             <div className="absolute -top-32 -right-32 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl" />
             <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl" />
 
-            <div className="relative grid lg:grid-cols-12 gap-10 p-8 lg:p-14">
-              {/* Left: copy */}
-              <div className="lg:col-span-5">
-                <div className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-amber-400 mb-5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  See It For Yourself
-                </div>
-                <h2 className="font-display font-bold text-4xl sm:text-5xl text-gradient-steel tracking-tight leading-[1.03]">
-                  Ready to make confident,
-                  <br />
-                  <span className="text-gradient-amber">data-driven decisions?</span>
-                </h2>
-                <p className="mt-6 text-lg text-navy-200 max-w-xl leading-relaxed">
-                  Book a 30-minute demo and we&apos;ll pull up real market data
-                  for the lanes, commodities, and carriers that matter to your
-                  business. Our goal isn&apos;t to sell you — it&apos;s to show
-                  you how Bulk Insights can help you win.
+            <div className="relative p-8 lg:p-14 text-center">
+              <div className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-amber-400 mb-6">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                See It For Yourself
+              </div>
+
+              <h2 className="font-display font-bold text-4xl sm:text-5xl lg:text-6xl text-gradient-steel tracking-tight leading-[1.03] max-w-3xl mx-auto">
+                Ready to make confident,
+                <br />
+                <span className="text-gradient-amber">profitable decisions?</span>
+              </h2>
+
+              <p className="mt-6 text-lg text-navy-200 max-w-2xl mx-auto leading-relaxed">
+                Tighter margins. Rising costs. A market that won&apos;t sit
+                still. 14 years of real bulk freight data, built to help
+                carriers, brokers, and shippers price with confidence and get
+                paid fairly.
+              </p>
+
+              <div className="mt-12 grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto text-left">
+                {perks.map((p) => (
+                  <div
+                    key={p.title}
+                    className="relative p-5 rounded-xl bg-navy-950/40 border border-white/5 hover:border-amber-400/30 transition-colors group"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="mt-0.5 h-6 w-6 rounded-lg bg-amber-400 text-navy-950 flex items-center justify-center flex-shrink-0 shadow-md shadow-amber-500/20">
+                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display font-bold text-white text-[15px] leading-snug">
+                          {p.title}
+                        </div>
+                        <p className="mt-1.5 text-[13px] text-navy-300 leading-relaxed">
+                          {p.body}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-12 max-w-sm mx-auto">
+                <BookingModal />
+                <p className="mt-4 text-xs font-mono text-amber-400/80 italic tracking-wide">
+                  Built to help our partners win.
                 </p>
+              </div>
 
-                <ul className="mt-8 space-y-3">
-                  {perks.map((p) => (
-                    <li key={p} className="flex items-start gap-3 text-navy-100">
-                      <span className="mt-0.5 h-5 w-5 rounded-full bg-amber-400 text-navy-950 flex items-center justify-center flex-shrink-0">
-                        <Check className="h-3 w-3" strokeWidth={3} />
-                      </span>
-                      <span className="text-sm lg:text-base">{p}</span>
-                    </li>
-                  ))}
-                </ul>
+              {/* Your Host — John Calloway */}
+              <div className="mt-12 max-w-xl mx-auto">
+                <div className="relative p-6 lg:p-7 rounded-2xl bg-gradient-to-br from-navy-950/80 to-navy-900/60 border border-amber-400/20 overflow-hidden text-left">
+                  <div className="absolute -top-20 -right-20 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl" />
 
-                <div className="mt-10 pt-8 border-t border-white/10 grid grid-cols-3 gap-3 text-center max-w-xs">
-                  <div>
-                    <div className="font-mono text-lg font-bold text-amber-400">30m</div>
-                    <div className="text-[10px] text-navy-400 font-mono uppercase tracking-widest">
-                      Demo
+                  <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
+                    <div className="relative flex-shrink-0 self-center sm:self-start">
+                      <div className="h-20 w-20 rounded-full overflow-hidden ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/20">
+                        <Image
+                          src="/john-calloway.png"
+                          alt="John F. Calloway"
+                          width={160}
+                          height={160}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-emerald-400 border-2 border-navy-900" />
+                    </div>
+
+                    <div className="flex-1 min-w-0 text-center sm:text-left">
+                      <div className="text-[9px] font-mono uppercase tracking-[0.25em] text-amber-400 mb-1.5">
+                        Your Host
+                      </div>
+                      <div className="font-display font-bold text-white text-lg leading-tight">
+                        John F. Calloway
+                      </div>
+                      <div className="text-xs text-amber-400/90 font-mono mt-0.5">
+                        Growth Architect, Enterprise
+                      </div>
+
+                      <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-x-4 gap-y-2 justify-center sm:justify-start">
+                        <a
+                          href="tel:+14175226740"
+                          className="flex items-center gap-1.5 text-[13px] text-navy-100 hover:text-amber-300 transition-colors group"
+                        >
+                          <Phone
+                            className="h-3.5 w-3.5 text-amber-400/70 group-hover:text-amber-400"
+                            strokeWidth={2.5}
+                          />
+                          <span className="font-mono">417.522.6740</span>
+                        </a>
+                        <a
+                          href="mailto:John.c@bulkloads.com"
+                          className="flex items-center gap-1.5 text-[13px] text-navy-100 hover:text-amber-300 transition-colors group"
+                        >
+                          <Mail
+                            className="h-3.5 w-3.5 text-amber-400/70 group-hover:text-amber-400"
+                            strokeWidth={2.5}
+                          />
+                          <span className="font-mono">John.c@bulkloads.com</span>
+                        </a>
+                      </div>
                     </div>
                   </div>
-                  <div className="border-x border-white/5">
-                    <div className="font-mono text-lg font-bold text-amber-400">Live</div>
-                    <div className="text-[10px] text-navy-400 font-mono uppercase tracking-widest">
-                      Data
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-mono text-lg font-bold text-amber-400">$0</div>
-                    <div className="text-[10px] text-navy-400 font-mono uppercase tracking-widest">
-                      Obligation
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-[11px] font-mono text-navy-400 uppercase tracking-widest">
-                  Or call · 1-800-518-9240
                 </div>
               </div>
 
-              {/* Right: calendar embed */}
-              <div className="lg:col-span-7">
-                <div className="relative rounded-2xl bg-white border border-white/10 shadow-2xl shadow-black/40 overflow-hidden">
-                  <div className="flex items-center gap-3 px-5 py-4 bg-navy-950 border-b border-white/10">
-                    <div className="h-9 w-9 rounded-lg bg-amber-400 text-navy-950 flex items-center justify-center">
-                      <Calendar className="h-4.5 w-4.5" strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <div className="font-display font-bold text-white text-base leading-tight">
-                        Book Your Demo
-                      </div>
-                      <div className="text-[11px] text-navy-300 font-mono">
-                        30 min · Zoom · No slides
-                      </div>
-                    </div>
-                    <div className="ml-auto flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-widest">
-                        Live Calendar
-                      </span>
-                    </div>
-                  </div>
-                  <iframe
-                    src="https://links.bulkloads.com/widget/booking/UzE0ZL169iih4haYPiob"
-                    style={{ width: "100%", border: "none", overflow: "hidden" }}
-                    scrolling="no"
-                    id="UzE0ZL169iih4haYPiob_1775840431013"
-                    className="min-h-[720px] w-full"
-                    title="Book a Bulk Insights demo"
-                  />
-                </div>
-              </div>
             </div>
           </div>
         </div>
-
-        <Script
-          src="https://links.bulkloads.com/js/form_embed.js"
-          strategy="afterInteractive"
-        />
       </section>
     </main>
   );
