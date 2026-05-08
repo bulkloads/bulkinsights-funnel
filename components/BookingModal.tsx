@@ -24,7 +24,8 @@ export default function BookingModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="group w-full inline-flex items-center justify-center gap-2 px-8 py-5 rounded-xl bg-amber-400 text-navy-950 font-bold text-base hover:bg-amber-300 transition-all shadow-xl shadow-amber-500/30 hover:shadow-amber-400/50 hover:-translate-y-0.5"
+        className="group w-full inline-flex items-center justify-center gap-2 px-8 py-5 rounded-xl font-bold text-base transition-all hover:-translate-y-0.5"
+        style={{ background: "#f47d01", color: "#0c1d2b", boxShadow: "0 8px 32px rgba(244,125,1,0.3)" }}
       >
         <Calendar className="h-5 w-5" strokeWidth={2.5} />
         Schedule Your Demo
