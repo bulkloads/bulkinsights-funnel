@@ -37,10 +37,6 @@ export default function Page() {
         <div className="absolute inset-0 dot-grid opacity-30" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-64 bg-gradient-to-b from-[#f47d01]/40 to-transparent" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] mb-6 rounded-full px-4 py-2" style={{ color: "#f47d01", background: "rgba(244,125,1,0.1)", border: "1px solid rgba(244,125,1,0.2)" }}>
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#f47d01" }} />
-            Powered by BulkLoads Data Network
-          </div>
           <h1 className="font-bold text-5xl sm:text-6xl lg:text-7xl text-gradient-steel tracking-tight leading-[1.03]">
             The market intelligence<br />
             <span className="text-gradient-orange">bulk freight deserves.</span>
@@ -53,7 +49,7 @@ export default function Page() {
             <div className="text-xs text-white/25">No commitment · 30 minutes · See your lanes live</div>
           </div>
           <div className="mt-12 grid grid-cols-3 gap-4 max-w-lg mx-auto">
-            {[["14 yrs","of settled freight data"],["33","commodities covered"],["5","equipment types"]].map(([num, label]) => (
+            {[["14 yrs","of settled freight data"],["33","commodity groups"],["5","equipment types"]].map(([num, label]) => (
               <div key={num} className="text-center">
                 <div className="font-bold text-2xl" style={{ color: "#f47d01" }}>{num}</div>
                 <div className="text-[10px] text-white/40 mt-0.5">{label}</div>
