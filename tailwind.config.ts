@@ -23,24 +23,20 @@ const config: Config = {
           900: "#131f31",
           950: "#08101c",
         },
-        amber: {
-          50: "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
+        bl: {
+          dark:   "#0c1d2b",
+          navy:   "#173346",
+          green:  "#328000",
+          lime:   "#95c93d",
+          orange: "#f47d01",
+          orangeHover: "#f89340",
         },
       },
       backgroundImage: {
         "grid-light":
           "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
         "radial-glow":
-          "radial-gradient(600px circle at 50% 0%, rgba(251,191,36,0.15), transparent 70%)",
+          "radial-gradient(600px circle at 50% 0%, rgba(244,125,1,0.12), transparent 70%)",
       },
     },
   },

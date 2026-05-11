@@ -13,19 +13,26 @@ html {
 }
 
 body {
-  background: #08101c;
+  background: #0c1d2b;
   color: #f0f4fa;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: #fbbf24;
-  color: #08101c;
+  background: #f47d01;
+  color: #0c1d2b;
 }
 
 .text-gradient-amber {
-  background: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+  background: linear-gradient(135deg, #f8b56a 0%, #f47d01 50%, #d96e01 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-orange {
+  background: linear-gradient(135deg, #f8b56a 0%, #f47d01 50%, #d96e01 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -39,6 +46,6 @@ body {
 }
 
 .dot-grid {
-  background-image: radial-gradient(rgba(251, 191, 36, 0.15) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(244, 125, 1, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
 }
