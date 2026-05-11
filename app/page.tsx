@@ -190,12 +190,8 @@ export default function Page() {
       {/* HEADER */}
       <header className="relative border-b sticky top-0 z-40" style={{ background: "rgba(12,29,43,0.97)", borderColor: "rgba(255,255,255,0.06)", backdropFilter: "blur(12px)" }}>
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-white rounded-lg px-3 py-1.5">
-              <Image src="/bulkloads-logo.png" alt="BulkLoads" width={130} height={32} className="h-7 w-auto" unoptimized />
-            </div>
-            <div className="h-5 w-px" style={{ background: "rgba(255,255,255,0.15)" }} />
-            <span className="text-[11px] uppercase tracking-[0.2em]" style={{ color: "#f47d01" }}>Bulk Insights</span>
+          <div className="flex items-center">
+            <Image src="/bulkloads-logo-transparent.png" alt="BulkLoads" width={130} height={32} className="h-8 w-auto" unoptimized />
           </div>
           <BookingModal variant="header" />
         </div>
@@ -345,9 +341,7 @@ export default function Page() {
       <footer className="border-t py-8" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="bg-white rounded px-2 py-1">
-              <Image src="/bulkloads-logo.png" alt="BulkLoads" width={90} height={22} className="h-5 w-auto" unoptimized />
-            </div>
+            <Image src="/bulkloads-logo-transparent.png" alt="BulkLoads" width={90} height={22} className="h-6 w-auto" unoptimized />
             <span className="text-xs text-white/25">· Bulk Insights</span>
           </div>
           <p className="text-[11px] text-white/20">© {new Date().getFullYear()} BulkLoads. Market data for bulk freight professionals.</p>
