@@ -156,7 +156,7 @@ export default function Page() {
                     <div className="flex-1 min-w-0 text-center sm:text-left">
                       <div className="text-[9px] uppercase tracking-[0.25em] mb-1.5" style={{ color: "#f47d01" }}>Your Host</div>
                       <div className="font-bold text-white text-lg leading-tight">John F. Calloway</div>
-                      <div className="text-xs mt-0.5" style={{ color: "rgba(244,125,1,0.9)" }}>Growth Architect, Enterprise</div>
+                      <div className="text-xs mt-0.5" style={{ color: "rgba(244,125,1,0.9)" }}>Chief Commercial Officer</div>
                       <div className="mt-4 pt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center sm:justify-start" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
                         <a href="tel:+14175226740" className="flex items-center gap-1.5 text-[13px] transition-colors" style={{ color: "#dbe5f1" }}>
                           <Mail className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: "rgba(244,125,1,0.7)" }} />
