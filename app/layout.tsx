@@ -8,9 +8,9 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Book a Demo | Bulk Insights",
+  title: "Bulk Insights | Rate benchmarks for bulk freight",
   description:
-    "Book a 30-minute demo and we'll pull up real market data for the lanes, commodities, and carriers that matter to your business.",
+    "Sign in with your BulkLoads account and price lanes in seconds. Confidence-scored rate benchmarks and commodity trends built from 14 years of settled bulk freight.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

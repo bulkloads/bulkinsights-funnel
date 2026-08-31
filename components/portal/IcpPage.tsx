@@ -202,7 +202,7 @@ export default function IcpPage({ icp }: { icp: Icp }) {
               {others.map((o) => (
                 <li key={o.slug}>
                   <Link
-                    href={`/portal/${o.slug}`}
+                    href={`/${o.slug}`}
                     className="group flex items-center justify-between gap-4 border bg-white p-6 transition-colors duration-200 hover:border-black/25"
                     style={{ borderColor: brand.border }}
                   >

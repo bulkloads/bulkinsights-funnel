@@ -122,9 +122,9 @@ export function Eyebrow({
    ────────────────────────────────────────────────────────────── */
 
 const navLinks = [
-  { href: "/portal/carriers", label: "Carriers" },
-  { href: "/portal/brokers", label: "Brokers" },
-  { href: "/portal/shippers", label: "Shippers" },
+  { href: "/carriers", label: "Carriers" },
+  { href: "/brokers", label: "Brokers" },
+  { href: "/shippers", label: "Shippers" },
 ];
 
 export function SiteHeader() {
@@ -160,7 +160,7 @@ export function SiteHeader() {
         style={{ borderColor: brand.border }}
       >
         <div className="shell flex h-[72px] items-center gap-8">
-          <Link href="/portal" className="flex shrink-0 items-center gap-2.5">
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
             <Image
               src="/bulkloads-logo-transparent.png"
               alt="BulkLoads Insights"

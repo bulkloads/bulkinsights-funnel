@@ -10,7 +10,7 @@ npm install
 npm run dev
 ```
 
-Then open **http://localhost:3000/portal**.
+Then open **http://localhost:3000**.
 
 Node 18+. No environment variables, no database, no API keys. Every page
 is statically prerendered.
@@ -19,10 +19,10 @@ is statically prerendered.
 
 | Route | File | Purpose |
 |---|---|---|
-| `/portal` | `app/portal/page.tsx` | Landing page |
-| `/portal/carriers` | `app/portal/carriers/page.tsx` | Role page |
-| `/portal/brokers` | `app/portal/brokers/page.tsx` | Role page |
-| `/portal/shippers` | `app/portal/shippers/page.tsx` | Role page |
+| `/` | `app/page.tsx` | Landing page |
+| `/carriers` | `app/carriers/page.tsx` | Role page |
+| `/brokers` | `app/brokers/page.tsx` | Role page |
+| `/shippers` | `app/shippers/page.tsx` | Role page |
 
 The three role pages are thin route files. All of their copy lives in
 `lib/icp.ts` and they share one template, `components/portal/IcpPage.tsx`.
@@ -44,8 +44,8 @@ components/portal/
 app/globals.css design system: type scale, focus, reduced motion
 ```
 
-`/` and `/preview` are the **previous** design and are not part of this
-work. They still build; delete them when this replaces the live site.
+The previous design (the old `/` and `/preview` pages) has been removed;
+this site now serves from the root.
 
 ## Design system
 
@@ -108,7 +108,7 @@ Slots are declared in `lib/media.ts`. To fill one: drop the file in
 | Hero posters (3) | Carriers, brokers, shippers posters are thumbnailer frames, not frame 1, so those heroes pop when playback starts. Home is already a true frame-0 capture. |
 | `homeCta` photo | Dusk, truck on a rural highway, room for text on the left |
 | Margin tool screenshot | The margin panel in `mockups.tsx` was built from a description, not a screenshot. Verify it against the real UI. |
-| Vector wordmark | `public/bulkloads-logo.svg` contains zero paths. It is `<text>` in a font that may not exist on the viewer's machine, and uses an outdated orange. The PNGs are what ship today. |
+| Vector wordmark | No usable SVG exists (the old `bulkloads-logo.svg` had zero paths and was removed). `public/bulkloads-logo-transparent.png` is what ships today. |
 | App icons | `app/icon.png` is only 64x64. Need 512 and 180. |
 | OG image | 1200x630. **No OG or Twitter metadata is configured at all**, so links currently share with no preview card. |
 

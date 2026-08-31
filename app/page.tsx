@@ -1,248 +1,291 @@
-import Image from "next/image";
-import { Check, BarChart3, Truck } from "lucide-react";
-import BookingModal from "@/components/BookingModal";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import Photo from "@/components/portal/Photo";
+import HeroMedia from "@/components/portal/HeroMedia";
+import MarketTicker from "@/components/portal/MarketTicker";
+import {
+  ClosingCta,
+  CtaPair,
+  Eyebrow,
+  SignInButton,
+  SiteFooter,
+  SiteHeader,
+} from "@/components/portal/shared";
+import { CommodityMockup, RatingMockup } from "@/components/portal/mockups";
+import { brand } from "@/lib/brand";
+import { icpList } from "@/lib/icp";
 
-const perks = [
-  { title: "Price with confidence.", body: "Low, average, and high rates across 33 commodities and 5 trailer types." },
-  { title: "Defend every bid.", body: "Confidence-scored benchmarks built from 14 years of settled freight." },
-  { title: "Get paid what you're worth.", body: "Fuel-adjusted rates with cost-per-mile baked in so you know your true margin." },
-  { title: "Stay ahead of the market.", body: "Regional load volume and commodity trends show where freight is heating up." },
+/* ──────────────────────────────────────────────────────────────
+   Content
+   ────────────────────────────────────────────────────────────── */
+
+const stats = [
+  { figure: "14", unit: "years", label: "of settled freight" },
+  { figure: "33", unit: "commodities", label: "dry and liquid bulk" },
+  { figure: "5", unit: "equipment types", label: "priced separately" },
 ];
 
-const features = [
-  { icon: Truck, tag: "Rate Intelligence", title: "Rating Tool", description: "Geo-fenced lane rates with equipment-type matching. Get low, average, and high benchmarks with confidence scoring on every estimate.", mockup: "rating" },
-  { icon: BarChart3, tag: "Market Trends", title: "Commodity Trends", description: "Rate trends by commodity group over 3, 6, 9, or 12 months. Know which markets are heating up before the freight moves.", mockup: "commodity" },
+/* Set as an editorial index rather than a grid of icon cards. */
+const capabilities = [
+  {
+    n: "01",
+    title: "Lane rate benchmarks",
+    body: "Geo-fenced origin-to-destination rates matched to your equipment type, with low, average, and high estimates per mile and per load.",
+  },
+  {
+    n: "02",
+    title: "Confidence scoring",
+    body: "Every estimate is scored on how closely the underlying freight matches your lane, so a thin lane never looks like a thick one.",
+  },
+  {
+    n: "03",
+    title: "Commodity trends",
+    body: "Rate movement by commodity group over 3, 6, 9, or 12 months. See which markets are firming before the freight moves.",
+  },
+  {
+    n: "04",
+    title: "Fuel-adjusted cost per mile",
+    body: "Rates carry fuel adjustment and cost-per-mile so the number you quote reflects your real margin, not a gross figure.",
+  },
+  {
+    n: "05",
+    title: "Regional load volume",
+    body: "Where freight is concentrating across the BulkLoads network, so you can position equipment ahead of the market.",
+  },
+  {
+    n: "06",
+    title: "Coverage where it counts",
+    body: "Hopper, end dump, walking floor, belt, and pneumatic, covering the dry and liquid bulk commodities that actually move.",
+  },
+  {
+    n: "07",
+    title: "RFP and bid support",
+    body: "Price a full bid sheet against settled freight rather than the long tail of guesswork. Shippers set realistic targets before a bid goes out; brokers see which lines they would be winning underpriced.",
+  },
 ];
 
-function MockupShell({ title, children }: { title: string; children: React.ReactNode }) {
+/* ──────────────────────────────────────────────────────────────
+   Page
+   ────────────────────────────────────────────────────────────── */
+
+export default function PortalPage() {
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style={{ background: "#0e1e2d" }}>
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10" style={{ background: "#0b1827" }}>
-        <div className="h-7 w-7 rounded-md flex items-center justify-center" style={{ background: "rgba(244,125,1,0.2)" }}>
-          <div className="h-3 w-3 rounded-sm" style={{ background: "#f47d01" }} />
-        </div>
-        <span className="text-white text-sm font-semibold">{title}</span>
-      </div>
-      {children}
-    </div>
-  );
-}
+    <div className="portal-scope min-h-screen bg-white" style={{ color: brand.ink }}>
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+      <SiteHeader />
 
-function RatingMockup() {
-  return (
-    <MockupShell title="Rating Tool">
-      <div className="flex gap-2 p-3 border-b border-white/5">
-        <div className="flex-1 rounded-lg px-3 py-2 text-xs text-white/70" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>Gallatin, Missouri</div>
-        <div className="flex items-center px-1 text-xs" style={{ color: "#f47d01" }}>⇄</div>
-        <div className="flex-1 rounded-lg px-3 py-2 text-xs text-white/70" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>Monett, Missouri</div>
-        <div className="rounded-lg px-3 py-2 text-xs font-bold ml-1" style={{ background: "#f47d01", color: "#0c1d2b" }}>Get Estimate</div>
-      </div>
-      <div className="p-4">
-        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-2">Rate Estimate: Hopper</div>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(149,201,61,0.3)", background: "rgba(149,201,61,0.06)" }}>
-            <div className="text-[9px] uppercase tracking-wider" style={{ color: "#95c93d" }}>Low</div>
-            <div className="text-lg font-bold mt-1" style={{ color: "#95c93d" }}>$3.22</div>
-            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
-            <div className="text-sm font-semibold mt-2" style={{ color: "#95c93d" }}>$802</div>
-            <div className="text-[9px] text-white/40">total</div>
+      <main id="main">
+        {/* ── HERO ────────────────────────────────────────────
+            Asymmetric 7/5 split. The product panel is offset and
+            runs past the container edge rather than sitting in a
+            centred, symmetrical frame. */}
+        <section className="relative isolate overflow-hidden" style={{ background: brand.ink }}>
+          <div className="absolute inset-0 -z-10">
+            <HeroMedia
+              slot="homeHero"
+              priority
+              scrim={"linear-gradient(90deg, rgba(19,19,18,0.94) 0%, rgba(19,19,18,0.86) 45%, rgba(19,19,18,0.62) 100%)"}
+            />
           </div>
-          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)" }}>
-            <div className="text-[9px] text-white/50 uppercase tracking-wider">Avg</div>
-            <div className="text-lg font-bold text-white mt-1">$3.60</div>
-            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
-            <div className="text-sm font-semibold text-white mt-2">$896</div>
-            <div className="text-[9px] text-white/40">total</div>
-          </div>
-          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(244,125,1,0.4)", background: "rgba(244,125,1,0.1)" }}>
-            <div className="text-[9px] uppercase tracking-wider" style={{ color: "#f47d01" }}>High</div>
-            <div className="text-lg font-bold mt-1" style={{ color: "#f47d01" }}>$3.98</div>
-            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
-            <div className="text-sm font-semibold mt-2" style={{ color: "#f47d01" }}>$991</div>
-            <div className="text-[9px] text-white/40">total</div>
-          </div>
-        </div>
-        <div className="mt-2 rounded-lg px-3 py-2" style={{ border: "1px solid rgba(149,201,61,0.2)", background: "rgba(149,201,61,0.06)" }}>
-          <div className="text-[10px] font-semibold" style={{ color: "#95c93d" }}>Confidence: 100/100 (geo-fenced lane + equipment type match)</div>
-          <div className="text-[10px] text-white/40 mt-0.5">Based on shipments within the geo-fence radius for this equipment type.</div>
-        </div>
-      </div>
-    </MockupShell>
-  );
-}
 
-function CommodityMockup() {
-  return (
-    <MockupShell title="Commodity Trends">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider">Rate Trends by Commodity Group</div>
-          <div className="flex gap-1">
-            {["3M","6M","9M","12M"].map(t => (
-              <button key={t} className="text-[9px] px-2 py-1 rounded" style={t === "12M" ? { background: "#f47d01", color: "#0c1d2b", fontWeight: 700 } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>{t}</button>
-            ))}
-          </div>
-        </div>
-        <div className="relative h-32 rounded-lg overflow-hidden">
-          <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none">
-            {["20","40","60","80"].map((y, i) => (<line key={i} x1="0" y1={y} x2="300" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />))}
-            <path d="M0,60 C30,58 60,56 90,52 C120,48 150,46 180,44 C210,40 240,30 280,15" fill="none" stroke="#3b82f6" strokeWidth="1.5" />
-            <path d="M0,55 C30,54 60,56 90,54 C120,52 150,53 180,52 C210,51 240,45 280,48" fill="none" stroke="#95c93d" strokeWidth="1.5" />
-            <path d="M0,58 C30,60 60,64 90,62 C120,60 150,61 180,60 C210,60 240,55 280,52" fill="none" stroke="#9ca3af" strokeWidth="1.5" />
-            <path d="M0,58 C30,57 60,58 90,60 C120,61 150,62 180,62 C210,58 240,50 280,54" fill="none" stroke="#f47d01" strokeWidth="1.5" />
-          </svg>
-        </div>
-        <div className="flex gap-3 mt-2 flex-wrap">
-          {[["Grain","#95c93d"],["Feed Ingredients","#f47d01"],["Aggregates & Industrial","#3b82f6"],["Other","#9ca3af"]].map(([label, color]) => (
-            <div key={label} className="flex items-center gap-1"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} /><span className="text-[9px] text-white/50">{label}</span></div>
-          ))}
-        </div>
-      </div>
-    </MockupShell>
-  );
-}
+          <div className="shell">
+            <div className="grid items-center gap-x-12 gap-y-14 pb-20 pt-16 lg:grid-cols-12 lg:pb-24 lg:pt-20">
+              <div className="min-w-0 lg:col-span-7">
+                <Eyebrow onDark>Bulk Insights</Eyebrow>
 
-const mockupMap: Record<string, React.ReactNode> = {
-  rating: <RatingMockup />,
-  commodity: <CommodityMockup />,
-};
+                <h1 className="t-display mt-6 text-[2.6rem] text-white sm:text-[3.5rem] lg:text-[4rem]">
+                  The market intelligence
+                  <br />
+                  <span style={{ color: brand.orange }}>bulk freight deserves.</span>
+                </h1>
 
-export default function Page() {
-  return (
-    <main className="min-h-screen" style={{ background: "#0c1d2b" }}>
+                <p className="t-lead mt-6 max-w-[34rem]" style={{ color: brand.textOnDark }}>
+                  Rate benchmarks and commodity trends built from 14 years of real settled bulk
+                  freight. Fuel-adjusted, confidence-scored, and matched to the lanes you actually
+                  run.
+                </p>
 
-      {/* HEADER */}
-      <header className="relative border-b sticky top-0 z-40" style={{ background: "rgba(12,29,43,0.97)", borderColor: "rgba(255,255,255,0.06)", backdropFilter: "blur(12px)" }}>
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center">
-            <Image src="/bulkloads-logo-transparent.png" alt="BulkLoads" width={130} height={32} className="h-8 w-auto" unoptimized />
-          </div>
-          <BookingModal variant="header" />
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="relative pt-20 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-radial-glow" />
-        <div className="absolute inset-0 dot-grid opacity-30" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-64 bg-gradient-to-b from-[#f47d01]/40 to-transparent" />
-        <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] mb-6 rounded-full px-4 py-2" style={{ color: "#f47d01", background: "rgba(244,125,1,0.1)", border: "1px solid rgba(244,125,1,0.2)" }}>
-            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#f47d01" }} />
-            Powered by BulkLoads Data Network
-          </div>
-          <h1 className="font-bold text-5xl sm:text-6xl lg:text-7xl text-gradient-steel tracking-tight leading-[1.03]">
-            The market intelligence<br />
-            <span className="text-gradient-orange">bulk freight deserves.</span>
-          </h1>
-          <p className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#8aabd0" }}>
-            Rate benchmarks and commodity trends built from 14 years of real settled freight in the BulkLoads network.
-          </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <BookingModal variant="hero" />
-            <div className="text-xs text-white/25">No commitment · 30 minutes · See your lanes live</div>
-          </div>
-          <div className="mt-12 grid grid-cols-3 gap-4 max-w-lg mx-auto">
-            {[["14 yrs","of settled freight data"],["33","commodities covered"],["5","equipment types"]].map(([num, label]) => (
-              <div key={num} className="text-center">
-                <div className="font-bold text-2xl" style={{ color: "#f47d01" }}>{num}</div>
-                <div className="text-[10px] text-white/40 mt-0.5">{label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="py-16 relative">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="text-[10px] uppercase tracking-[0.25em] mb-3" style={{ color: "#f47d01" }}>A Glimpse Inside</div>
-            <h2 className="font-bold text-3xl sm:text-4xl text-gradient-steel">Built specifically for bulk freight</h2>
-            <p className="mt-3 max-w-xl mx-auto text-sm leading-relaxed" style={{ color: "#8aabd0" }}>
-              These are just a few of the tools inside Bulk Insights. In your demo, we pull up live data for your lanes and show you everything relevant to your business.
-            </p>
-          </div>
-          <div className="space-y-20">
-            {features.map((feat, i) => (
-              <div key={feat.title} className={`grid lg:grid-cols-2 gap-10 items-center ${i % 2 === 1 ? "lg:grid-flow-dense" : ""}`}>
-                <div className={i % 2 === 1 ? "lg:col-start-2" : ""}>
-                  <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] rounded-full px-3 py-1.5 mb-4" style={{ color: "#f47d01", background: "rgba(244,125,1,0.1)", border: "1px solid rgba(244,125,1,0.2)" }}>
-                    <feat.icon className="h-3 w-3" />{feat.tag}
-                  </div>
-                  <h3 className="font-bold text-2xl sm:text-3xl text-white mb-3">{feat.title}</h3>
-                  <p className="leading-relaxed mb-6" style={{ color: "#8aabd0" }}>{feat.description}</p>
-                  <BookingModal variant="hero" />
-                </div>
-                <div className={`relative ${i % 2 === 1 ? "lg:col-start-1 lg:row-start-1" : ""}`}>
-                  <div className="absolute -inset-4 rounded-3xl blur-2xl" style={{ background: "rgba(244,125,1,0.05)" }} />
-                  <div className="relative">{mockupMap[feat.mockup]}</div>
+                <div className="mt-9">
+                  <CtaPair onDark />
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <div className="max-w-6xl mx-auto px-6"><div className="border-t border-white/5" /></div>
-
-      {/* CTA / BOOKING */}
-      <section id="book" className="relative py-16 lg:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-radial-glow" />
-        <div className="absolute inset-0 dot-grid opacity-40" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-[#f47d01]/40 via-[#f47d01]/10 to-transparent" />
-        <div className="relative max-w-5xl mx-auto px-6 lg:px-8">
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(244,125,1,0.2)", boxShadow: "0 25px 60px rgba(244,125,1,0.08)" }}>
-            <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, #173346 0%, #1c3a52 50%, #0c1d2b 100%)" }} />
-            <div className="absolute inset-0 bg-grid-light opacity-20" style={{ backgroundSize: "48px 48px" }} />
-            <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl" style={{ background: "rgba(244,125,1,0.08)" }} />
-            <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl" style={{ background: "rgba(149,201,61,0.05)" }} />
-            <div className="relative p-8 lg:p-14 text-center">
-              <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] mb-6" style={{ color: "#f47d01" }}>
-                <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#f47d01" }} />
-                See It For Yourself
-              </div>
-              <h2 className="font-bold text-4xl sm:text-5xl lg:text-6xl text-gradient-steel tracking-tight leading-[1.03] max-w-3xl mx-auto">
-                Ready to make confident,<br />
-                <span className="text-gradient-orange">profitable decisions?</span>
-              </h2>
-              <p className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#b7cce4" }}>
-                Tighter margins. Rising costs. A market that won&apos;t sit still. 14 years of real bulk freight data, built to help carriers, brokers, and shippers price with confidence and get paid fairly.
-              </p>
-              <div className="mt-12 grid sm:grid-cols-2 gap-5 max-w-3xl mx-auto text-left">
-                {perks.map((p) => (
-                  <div key={p.title} className="relative p-5 rounded-xl transition-colors" style={{ background: "rgba(12,29,43,0.5)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                    <div className="flex items-start gap-3">
-                      <span className="mt-0.5 h-6 w-6 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "#f47d01", color: "#0c1d2b", boxShadow: "0 4px 12px rgba(244,125,1,0.25)" }}>
-                        <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="font-bold text-white text-[15px] leading-snug">{p.title}</div>
-                        <p className="mt-1.5 text-[13px] leading-relaxed" style={{ color: "#8aabd0" }}>{p.body}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-12 max-w-sm mx-auto">
-                <BookingModal />
-                <p className="mt-4 text-xs italic tracking-wide" style={{ color: "rgba(244,125,1,0.8)" }}>Built to help our partners win.</p>
+              {/* Offset downward and run out toward the viewport edge. */}
+              <div className="min-w-0 lg:col-span-5 lg:translate-y-6">
+                <div className="bleed-right">
+                  <RatingMockup />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* FOOTER */}
-      <footer className="border-t py-8" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Image src="/bulkloads-logo-transparent.png" alt="BulkLoads" width={90} height={22} className="h-6 w-auto" unoptimized />
-            <span className="text-xs text-white/25">· Bulk Insights</span>
+          {/* Stat strip: hairline-divided figures, not centred cards. */}
+          <div className="border-t" style={{ borderColor: "rgba(255,255,255,0.16)" }}>
+            <div className="shell">
+              <dl className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0"
+                style={{ borderColor: "rgba(255,255,255,0.16)" }}>
+                {stats.map((s, i) => (
+                  <div
+                    key={s.label}
+                    className={`py-6 ${i > 0 ? "sm:pl-8" : ""} ${i < stats.length - 1 ? "sm:pr-8" : ""}`}
+                    style={{ borderColor: "rgba(255,255,255,0.16)" }}
+                  >
+                    <dt className="sr-only">{s.label}</dt>
+                    <dd>
+                      <span
+                        className="tabular text-[2rem] font-bold leading-none"
+                        style={{ color: brand.orange }}
+                      >
+                        {s.figure}
+                      </span>
+                      <span className="ml-2 text-sm font-medium" style={{ color: brand.textOnDark }}>
+                        {s.unit}
+                      </span>
+                      <div className="mt-1.5 text-[13px]" style={{ color: brand.textOnDarkMuted }}>
+                        {s.label}
+                      </div>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </div>
-          <p className="text-[11px] text-white/20">© {new Date().getFullYear()} BulkLoads. Market data for bulk freight professionals.</p>
-        </div>
-      </footer>
-    </main>
+        </section>
+
+        {/* ── MARKET TICKER ──────────────────────────────────── */}
+        <MarketTicker />
+
+        {/* ── WHAT'S INSIDE ──────────────────────────────────── */}
+        <section className="bg-white py-24 lg:py-28">
+          <div className="shell">
+            <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
+              <div className="min-w-0 lg:col-span-5">
+                <Eyebrow>What&apos;s inside</Eyebrow>
+                <h2 className="t-h2 mt-6 text-[2.25rem] sm:text-[3rem] lg:text-[3.6rem]">
+                  Built specifically for bulk freight
+                </h2>
+                <p className="t-lead mt-5" style={{ color: brand.textBody }}>
+                  General freight tools average bulk into the noise. Every number here comes from
+                  bulk commodities moving on bulk equipment.
+                </p>
+              </div>
+
+              {/* Editorial index: hairline rules and numerals carry the
+                  structure instead of six identical icon tiles. */}
+              <ol className="lg:col-span-7 lg:pt-2">
+                {capabilities.map((c, i) => (
+                  <li
+                    key={c.n}
+                    className={`grid grid-cols-[auto_1fr] gap-x-6 border-t py-6 ${
+                      i === capabilities.length - 1 ? "border-b" : ""
+                    }`}
+                    style={{ borderColor: brand.border }}
+                  >
+                    <span className="t-index pt-0.5 text-sm" style={{ color: brand.textMuted }}>
+                      {c.n}
+                    </span>
+                    <div>
+                      <h3 className="t-h3 text-[17px]">{c.title}</h3>
+                      <p className="t-body mt-1.5 text-[15px]" style={{ color: brand.textBody }}>
+                        {c.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
+        </section>
+
+        {/* ── TRENDS SPOTLIGHT ───────────────────────────────── */}
+        <section className="py-24 lg:py-28" style={{ background: brand.offWhite }}>
+          <div className="shell">
+            <div className="grid items-center gap-x-14 gap-y-12 lg:grid-cols-12">
+              <div className="min-w-0 lg:col-span-5">
+                <Eyebrow>Market trends</Eyebrow>
+                <h2 className="t-h2 mt-6 text-[2.25rem] sm:text-[2.75rem] lg:text-[3.2rem]">
+                  Know which markets are moving
+                </h2>
+                <p className="t-lead mt-5" style={{ color: brand.textBody }}>
+                  Track rate movement by commodity group over 3, 6, 9, or 12 months. Grain, feed
+                  ingredients, aggregates and industrial, each on its own line, so a shift in one
+                  market never hides inside an average.
+                </p>
+                <div className="mt-8">
+                  <SignInButton />
+                </div>
+              </div>
+              <div className="min-w-0 lg:col-span-7">
+                <CommodityMockup />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── ROLE PAGES ─────────────────────────────────────── */}
+        <section className="bg-white py-24 lg:py-28">
+          <div className="shell">
+            <div className="max-w-2xl">
+              <Eyebrow>By role</Eyebrow>
+              <h2 className="t-h2 mt-6 text-[2.25rem] sm:text-[3rem] lg:text-[3.6rem]">
+                One source of truth, whichever side you&apos;re on
+              </h2>
+              <p className="t-lead mt-5" style={{ color: brand.textBody }}>
+                The data underneath is the same 14 years of settled bulk freight. What changes is
+                the job it does for you.
+              </p>
+            </div>
+
+            <ul className="mt-12 grid gap-6 md:grid-cols-3">
+              {icpList.map((icp) => (
+                <li key={icp.slug}>
+                  <Link
+                    href={`/${icp.slug}`}
+                    className="group flex h-full flex-col overflow-hidden border transition-colors duration-200 hover:border-black/25"
+                    style={{ borderColor: brand.border }}
+                  >
+                    <div className="relative h-40">
+                      <Photo slot={icp.slug} tone="light" />
+                    </div>
+                    <div className="flex flex-1 flex-col p-6">
+                      <h3 className="t-h3 text-[19px]">{icp.nav}</h3>
+                      <p
+                        className="mt-1.5 text-[15px] font-semibold leading-snug"
+                        style={{ color: brand.text }}
+                      >
+                        {icp.headline} {icp.headlineAccent}
+                      </p>
+                      <p
+                        className="t-body mt-3 flex-1 text-[15px]"
+                        style={{ color: brand.textBody }}
+                      >
+                        {icp.sub}
+                      </p>
+                      <span
+                        className="mt-6 inline-flex items-center gap-1.5 border-t pt-4 text-sm font-semibold"
+                        style={{ borderColor: brand.border, color: brand.ink }}
+                      >
+                        See how it works
+                        <ArrowRight
+                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                          strokeWidth={2.5}
+                          style={{ color: brand.text }}
+                        />
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <ClosingCta />
+      </main>
+
+      <SiteFooter />
+    </div>
   );
 }
