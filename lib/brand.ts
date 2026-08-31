@@ -62,8 +62,18 @@ export const brand = {
 } as const;
 
 /**
- * Account entry points. Both redirect into the hosted auth at
- * auth.bulkloads.com.
+ * Account entry points: the Insights front door (ENG-1177), which owns
+ * the WorkOS handoff. Sign-in returns existing customers to the app;
+ * sign-up routes new ones through org creation and the plan picker.
+ *
+ * The origin is overridable so preview builds can target a preview
+ * deployment of Insights; the /api/auth/* paths are Insights' contract.
+ * NEXT_PUBLIC_ vars are inlined at build time, so changing the value
+ * requires a redeploy.
  */
-export const SIGN_IN_URL = "https://v2.bulkloads.com/sign-in";
-export const SIGN_UP_URL = "https://v2.bulkloads.com/sign-up";
+const INSIGHTS_ORIGIN = (
+  process.env.NEXT_PUBLIC_INSIGHTS_URL ?? "https://insights.bulkloads.com"
+).replace(/\/+$/, "");
+
+export const SIGN_IN_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-in`;
+export const SIGN_UP_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-up`;
