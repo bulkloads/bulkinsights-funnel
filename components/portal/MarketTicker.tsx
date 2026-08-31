@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { brand } from "@/lib/brand";
-import { isLive, period, rows, type TickerRow } from "@/lib/ticker";
+import { getTicker } from "@/lib/ticker-feed";
+import type { TickerRow } from "@/lib/ticker";
 
 function Cell({ row }: { row: TickerRow }) {
   const up = row.change > 0;
@@ -37,8 +38,16 @@ function Cell({ row }: { row: TickerRow }) {
  * what makes the loop seamless. The duplicate is aria-hidden so screen
  * readers hear the list once, and the whole strip stops moving under
  * prefers-reduced-motion, where it becomes a normal scrollable row.
+ *
+ * A server component: `getTicker` reads the Insights feed with the shared
+ * secret, which must never reach the browser, and revalidates hourly rather
+ * than per visitor. It never throws — when the feed is unreachable it returns
+ * the illustrative rows with `isLive` false, and the strip below then labels
+ * itself indicative instead of live.
  */
-export default function MarketTicker() {
+export default async function MarketTicker() {
+  const { rows, period, isLive } = await getTicker();
+
   const track = (
     <div className="ticker-track flex items-center">
       {rows.map((r) => (
