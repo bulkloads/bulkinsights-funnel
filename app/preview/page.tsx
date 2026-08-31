@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Check, Phone, Mail, TrendingUp, BarChart3, Truck, Anchor, ArrowRight } from "lucide-react";
+import { Check, BarChart3, Truck, ArrowRight } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
 
 const perks = [
@@ -29,22 +29,6 @@ const features = [
     description:
       "Geo-fenced lane rates with equipment-type matching. Get low, average, and high benchmarks with confidence scoring on every estimate.",
     mockup: "rating",
-  },
-  {
-    icon: Anchor,
-    tag: "Waterway Markets",
-    title: "Barge Data",
-    description:
-      "Spot vs. 3-month forward curves for every major river terminal. Spot the spread before competitors do.",
-    mockup: "barge",
-  },
-  {
-    icon: TrendingUp,
-    tag: "Multi-Modal",
-    title: "Grain Transport Cost",
-    description:
-      "Cost per ton by mode — truck, shuttle train, barge, Gulf vessel, Pacific vessel — on a single chart so you always know the most efficient move.",
-    mockup: "grain",
   },
   {
     icon: BarChart3,
@@ -122,95 +106,8 @@ function RatingMockup() {
           </div>
         </div>
         <div className="mt-2 rounded-lg px-3 py-2" style={{ border: "1px solid rgba(149,201,61,0.2)", background: "rgba(149,201,61,0.06)" }}>
-          <div className="text-[10px] font-semibold" style={{ color: "#95c93d" }}>Confidence: 100/100 — Geo-fenced lane + equipment type match</div>
+          <div className="text-[10px] font-semibold" style={{ color: "#95c93d" }}>Confidence: 100/100 (geo-fenced lane + equipment type match)</div>
           <div className="text-[10px] text-white/40 mt-0.5">Based on shipments within the geo-fence radius for this equipment type.</div>
-        </div>
-      </div>
-    </MockupShell>
-  );
-}
-
-function BargeMockup() {
-  return (
-    <MockupShell title="Barge Data">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[11px] text-white/50">Location: <span className="text-white">St. Louis</span></div>
-          <div className="flex gap-1">
-            {["3M","6M","9M","12M"].map(t => (
-              <button key={t} className={`text-[9px] px-2 py-1 rounded font-mono`}
-                style={t === "6M" ? { background: "#f47d01", color: "#0c1d2b", fontWeight: 700 } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="text-[10px] text-white/40 uppercase tracking-wider font-mono mb-3">Spot vs 3-Month Forward: St. Louis</div>
-        <div className="relative h-32 rounded-lg overflow-hidden" style={{ background: "rgba(255,255,255,0.02)" }}>
-          <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none">
-            <path d="M0,60 C30,55 60,40 90,35 C120,30 150,25 180,30 C210,35 240,40 270,50 L300,55 L300,100 L0,100 Z" fill="rgba(120,53,15,0.5)" />
-            <path d="M0,40 C30,38 60,32 90,28 C120,24 150,22 180,24 C210,26 240,30 270,32 L300,25" fill="none" stroke="#3b82f6" strokeWidth="1.5" />
-            <path d="M0,48 C30,46 60,38 90,34 C120,30 150,28 180,30 C210,32 240,36 270,40 L300,38" fill="none" stroke="#95c93d" strokeWidth="1.5" />
-            <path d="M0,60 C30,55 60,40 90,35 C120,30 150,25 180,30 C210,35 240,40 270,50 L300,55" fill="none" stroke="#f47d01" strokeWidth="1.5" />
-          </svg>
-          <div className="absolute right-2 top-2 flex flex-col gap-0.5">
-            <span className="text-[9px] font-mono" style={{ color: "#95c93d" }}>+85</span>
-            <span className="text-[9px] text-white/30 font-mono">+0</span>
-            <span className="text-[9px] text-red-400 font-mono">-85</span>
-          </div>
-        </div>
-        <div className="flex gap-3 mt-2">
-          {[["spread","#f47d01"],["spot","#3b82f6"],["forward","#95c93d"]].map(([label, color]) => (
-            <div key={label} className="flex items-center gap-1">
-              <div className="h-0.5 w-3 rounded" style={{ backgroundColor: color }} />
-              <span className="text-[9px] text-white/40 font-mono">{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </MockupShell>
-  );
-}
-
-function GrainMockup() {
-  return (
-    <MockupShell title="Grain Transport Cost">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[10px] text-white/40 uppercase tracking-wider font-mono">$/Ton by Mode</div>
-          <div className="flex gap-1">
-            {["3M","6M","9M","12M"].map(t => (
-              <button key={t} className="text-[9px] px-2 py-1 rounded font-mono"
-                style={t === "6M" ? { background: "#f47d01", color: "#0c1d2b", fontWeight: 700 } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="relative h-36 rounded-lg overflow-hidden">
-          <svg viewBox="0 0 300 120" className="w-full h-full" preserveAspectRatio="none">
-            <text x="4" y="12" fill="rgba(255,255,255,0.2)" fontSize="7">$245</text>
-            <text x="4" y="40" fill="rgba(255,255,255,0.2)" fontSize="7">$210</text>
-            <text x="4" y="68" fill="rgba(255,255,255,0.2)" fontSize="7">$175</text>
-            <text x="4" y="96" fill="rgba(255,255,255,0.2)" fontSize="7">$140</text>
-            <line x1="20" y1="10" x2="300" y2="10" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-            <line x1="20" y1="38" x2="300" y2="38" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-            <line x1="20" y1="66" x2="300" y2="66" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-            <line x1="20" y1="94" x2="300" y2="94" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
-            <path d="M20,72 C60,68 80,50 110,40 C140,30 160,20 190,18 C210,32 240,50 280,50" fill="none" stroke="#14b8a6" strokeWidth="1.5" />
-            <path d="M20,88 C60,88 100,87 140,87 C170,87 200,76 240,68 L280,66" fill="none" stroke="#f47d01" strokeWidth="1.5" />
-            <path d="M20,88 C60,88 100,88 140,86 C170,82 200,78 240,76 L280,74" fill="none" stroke="#a855f7" strokeWidth="1.5" />
-            <path d="M20,88 C60,88 100,88 140,87 C170,85 200,82 240,78 L280,76" fill="none" stroke="#ec4899" strokeWidth="1.5" />
-            <path d="M20,90 C60,84 100,82 140,82 C170,82 210,83 240,84 L280,84" fill="none" stroke="#3b82f6" strokeWidth="1.5" />
-          </svg>
-        </div>
-        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-          {[["Truck","#f47d01"],["Shuttle Train","#3b82f6"],["Barge","#14b8a6"],["Gulf Vessel","#a855f7"],["Pacific Vessel","#ec4899"]].map(([label, color]) => (
-            <div key={label} className="flex items-center gap-1">
-              <div className="h-0.5 w-3 rounded" style={{ backgroundColor: color }} />
-              <span className="text-[9px] text-white/40 font-mono">{label}</span>
-            </div>
-          ))}
         </div>
       </div>
     </MockupShell>
@@ -258,8 +155,6 @@ function CommodityMockup() {
 
 const mockupMap: Record<string, React.ReactNode> = {
   rating: <RatingMockup />,
-  barge: <BargeMockup />,
-  grain: <GrainMockup />,
   commodity: <CommodityMockup />,
 };
 
@@ -304,7 +199,7 @@ export default function PreviewPage() {
           </h1>
 
           <p className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#8aabd0" }}>
-            Rate benchmarks, barge data, multi-modal cost comparisons, and commodity trends built from 14 years of real settled freight in the BulkLoads network.
+            Rate benchmarks and commodity trends built from 14 years of real settled freight in the BulkLoads network.
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
@@ -442,42 +337,6 @@ export default function PreviewPage() {
                 <p className="mt-4 text-xs font-mono italic tracking-wide" style={{ color: "rgba(244,125,1,0.8)" }}>
                   Built to help our partners win.
                 </p>
-              </div>
-
-              {/* Host card */}
-              <div className="mt-12 max-w-xl mx-auto">
-                <div className="relative p-6 lg:p-7 rounded-2xl overflow-hidden text-left" style={{ background: "linear-gradient(135deg, rgba(12,29,43,0.9) 0%, rgba(23,51,70,0.7) 100%)", border: "1px solid rgba(244,125,1,0.2)" }}>
-                  <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl" style={{ background: "rgba(244,125,1,0.08)" }} />
-                  <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
-                    <div className="relative flex-shrink-0 self-center sm:self-start">
-                      <div className="h-20 w-20 rounded-full overflow-hidden" style={{ outline: "2px solid rgba(244,125,1,0.4)", boxShadow: "0 8px 24px rgba(244,125,1,0.2)" }}>
-                        <Image
-                          src="/john-calloway.png"
-                          alt="John F. Calloway"
-                          width={160}
-                          height={160}
-                          className="h-full w-full object-cover object-top"
-                        />
-                      </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2" style={{ background: "#95c93d", borderColor: "#173346" }} />
-                    </div>
-                    <div className="flex-1 min-w-0 text-center sm:text-left">
-                      <div className="text-[9px] font-mono uppercase tracking-[0.25em] mb-1.5" style={{ color: "#f47d01" }}>Your Host</div>
-                      <div className="font-display font-bold text-white text-lg leading-tight">John F. Calloway</div>
-                      <div className="text-xs font-mono mt-0.5" style={{ color: "rgba(244,125,1,0.9)" }}>Chief Commercial Officer</div>
-                      <div className="mt-4 pt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center sm:justify-start" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                        <a href="tel:+14175226740" className="flex items-center gap-1.5 text-[13px] transition-colors group" style={{ color: "#dbe5f1" }}>
-                          <Phone className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: "rgba(244,125,1,0.7)" }} />
-                          <span className="font-mono">417.522.6740</span>
-                        </a>
-                        <a href="mailto:John.c@bulkloads.com" className="flex items-center gap-1.5 text-[13px] transition-colors group" style={{ color: "#dbe5f1" }}>
-                          <Mail className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: "rgba(244,125,1,0.7)" }} />
-                          <span className="font-mono">John.c@bulkloads.com</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

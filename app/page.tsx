@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Check, Phone, Mail, TrendingUp, BarChart3, Truck, Anchor } from "lucide-react";
+import { Check, BarChart3, Truck } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
 
 const perks = [
@@ -10,12 +10,102 @@ const perks = [
 ];
 
 const features = [
-  { icon: Truck, tag: "Rate Intelligence", title: "Rating Tool", description: "Geo-fenced lane rates with equipment-type matching. Get low, average, and high benchmarks with confidence scoring on every estimate.", screenshot: "/screenshot-1.png" },
-  { icon: Anchor, tag: "Waterway Markets", title: "Barge Data", description: "Spot vs. 3-month forward curves for every major river terminal. Spot the spread before competitors do.", screenshot: "/screenshot-2.png" },
-  { icon: TrendingUp, tag: "Multi-Modal", title: "Grain Transport Cost", description: "Cost per ton by mode — truck, shuttle train, barge, Gulf vessel, Pacific vessel — on a single chart so you always know the most efficient move.", screenshot: "/screenshot-3.png" },
-  { icon: BarChart3, tag: "Market Trends", title: "Commodity Trends", description: "Rate trends by commodity group over 3, 6, 9, or 12 months. Know which markets are heating up before the freight moves.", screenshot: "/screenshot-4.png" },
+  { icon: Truck, tag: "Rate Intelligence", title: "Rating Tool", description: "Geo-fenced lane rates with equipment-type matching. Get low, average, and high benchmarks with confidence scoring on every estimate.", mockup: "rating" },
+  { icon: BarChart3, tag: "Market Trends", title: "Commodity Trends", description: "Rate trends by commodity group over 3, 6, 9, or 12 months. Know which markets are heating up before the freight moves.", mockup: "commodity" },
 ];
 
+function MockupShell({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl" style={{ background: "#0e1e2d" }}>
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10" style={{ background: "#0b1827" }}>
+        <div className="h-7 w-7 rounded-md flex items-center justify-center" style={{ background: "rgba(244,125,1,0.2)" }}>
+          <div className="h-3 w-3 rounded-sm" style={{ background: "#f47d01" }} />
+        </div>
+        <span className="text-white text-sm font-semibold">{title}</span>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function RatingMockup() {
+  return (
+    <MockupShell title="Rating Tool">
+      <div className="flex gap-2 p-3 border-b border-white/5">
+        <div className="flex-1 rounded-lg px-3 py-2 text-xs text-white/70" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>Gallatin, Missouri</div>
+        <div className="flex items-center px-1 text-xs" style={{ color: "#f47d01" }}>⇄</div>
+        <div className="flex-1 rounded-lg px-3 py-2 text-xs text-white/70" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>Monett, Missouri</div>
+        <div className="rounded-lg px-3 py-2 text-xs font-bold ml-1" style={{ background: "#f47d01", color: "#0c1d2b" }}>Get Estimate</div>
+      </div>
+      <div className="p-4">
+        <div className="text-[10px] text-white/40 uppercase tracking-wider mb-2">Rate Estimate: Hopper</div>
+        <div className="grid grid-cols-3 gap-2">
+          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(149,201,61,0.3)", background: "rgba(149,201,61,0.06)" }}>
+            <div className="text-[9px] uppercase tracking-wider" style={{ color: "#95c93d" }}>Low</div>
+            <div className="text-lg font-bold mt-1" style={{ color: "#95c93d" }}>$3.22</div>
+            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
+            <div className="text-sm font-semibold mt-2" style={{ color: "#95c93d" }}>$802</div>
+            <div className="text-[9px] text-white/40">total</div>
+          </div>
+          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(255,255,255,0.1)", background: "rgba(255,255,255,0.05)" }}>
+            <div className="text-[9px] text-white/50 uppercase tracking-wider">Avg</div>
+            <div className="text-lg font-bold text-white mt-1">$3.60</div>
+            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
+            <div className="text-sm font-semibold text-white mt-2">$896</div>
+            <div className="text-[9px] text-white/40">total</div>
+          </div>
+          <div className="rounded-xl p-3 text-center" style={{ border: "1px solid rgba(244,125,1,0.4)", background: "rgba(244,125,1,0.1)" }}>
+            <div className="text-[9px] uppercase tracking-wider" style={{ color: "#f47d01" }}>High</div>
+            <div className="text-lg font-bold mt-1" style={{ color: "#f47d01" }}>$3.98</div>
+            <div className="text-[9px] text-white/40 mt-0.5">per mile</div>
+            <div className="text-sm font-semibold mt-2" style={{ color: "#f47d01" }}>$991</div>
+            <div className="text-[9px] text-white/40">total</div>
+          </div>
+        </div>
+        <div className="mt-2 rounded-lg px-3 py-2" style={{ border: "1px solid rgba(149,201,61,0.2)", background: "rgba(149,201,61,0.06)" }}>
+          <div className="text-[10px] font-semibold" style={{ color: "#95c93d" }}>Confidence: 100/100 (geo-fenced lane + equipment type match)</div>
+          <div className="text-[10px] text-white/40 mt-0.5">Based on shipments within the geo-fence radius for this equipment type.</div>
+        </div>
+      </div>
+    </MockupShell>
+  );
+}
+
+function CommodityMockup() {
+  return (
+    <MockupShell title="Commodity Trends">
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-[10px] text-white/40 uppercase tracking-wider">Rate Trends by Commodity Group</div>
+          <div className="flex gap-1">
+            {["3M","6M","9M","12M"].map(t => (
+              <button key={t} className="text-[9px] px-2 py-1 rounded" style={t === "12M" ? { background: "#f47d01", color: "#0c1d2b", fontWeight: 700 } : { background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}>{t}</button>
+            ))}
+          </div>
+        </div>
+        <div className="relative h-32 rounded-lg overflow-hidden">
+          <svg viewBox="0 0 300 100" className="w-full h-full" preserveAspectRatio="none">
+            {["20","40","60","80"].map((y, i) => (<line key={i} x1="0" y1={y} x2="300" y2={y} stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />))}
+            <path d="M0,60 C30,58 60,56 90,52 C120,48 150,46 180,44 C210,40 240,30 280,15" fill="none" stroke="#3b82f6" strokeWidth="1.5" />
+            <path d="M0,55 C30,54 60,56 90,54 C120,52 150,53 180,52 C210,51 240,45 280,48" fill="none" stroke="#95c93d" strokeWidth="1.5" />
+            <path d="M0,58 C30,60 60,64 90,62 C120,60 150,61 180,60 C210,60 240,55 280,52" fill="none" stroke="#9ca3af" strokeWidth="1.5" />
+            <path d="M0,58 C30,57 60,58 90,60 C120,61 150,62 180,62 C210,58 240,50 280,54" fill="none" stroke="#f47d01" strokeWidth="1.5" />
+          </svg>
+        </div>
+        <div className="flex gap-3 mt-2 flex-wrap">
+          {[["Grain","#95c93d"],["Feed Ingredients","#f47d01"],["Aggregates & Industrial","#3b82f6"],["Other","#9ca3af"]].map(([label, color]) => (
+            <div key={label} className="flex items-center gap-1"><div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} /><span className="text-[9px] text-white/50">{label}</span></div>
+          ))}
+        </div>
+      </div>
+    </MockupShell>
+  );
+}
+
+const mockupMap: Record<string, React.ReactNode> = {
+  rating: <RatingMockup />,
+  commodity: <CommodityMockup />,
+};
 
 export default function Page() {
   return (
@@ -37,19 +127,23 @@ export default function Page() {
         <div className="absolute inset-0 dot-grid opacity-30" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-px h-64 bg-gradient-to-b from-[#f47d01]/40 to-transparent" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] mb-6 rounded-full px-4 py-2" style={{ color: "#f47d01", background: "rgba(244,125,1,0.1)", border: "1px solid rgba(244,125,1,0.2)" }}>
+            <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: "#f47d01" }} />
+            Powered by BulkLoads Data Network
+          </div>
           <h1 className="font-bold text-5xl sm:text-6xl lg:text-7xl text-gradient-steel tracking-tight leading-[1.03]">
             The market intelligence<br />
             <span className="text-gradient-orange">bulk freight deserves.</span>
           </h1>
           <p className="mt-6 text-lg max-w-2xl mx-auto leading-relaxed" style={{ color: "#8aabd0" }}>
-            Rate benchmarks, barge data, multi-modal cost comparisons, and commodity trends built from 14 years of real settled freight in the BulkLoads network.
+            Rate benchmarks and commodity trends built from 14 years of real settled freight in the BulkLoads network.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             <BookingModal variant="hero" />
             <div className="text-xs text-white/25">No commitment · 30 minutes · See your lanes live</div>
           </div>
           <div className="mt-12 grid grid-cols-3 gap-4 max-w-lg mx-auto">
-            {[["14 yrs","of settled freight data"],["33","commodity groups"],["5","equipment types"]].map(([num, label]) => (
+            {[["14 yrs","of settled freight data"],["33","commodities covered"],["5","equipment types"]].map(([num, label]) => (
               <div key={num} className="text-center">
                 <div className="font-bold text-2xl" style={{ color: "#f47d01" }}>{num}</div>
                 <div className="text-[10px] text-white/40 mt-0.5">{label}</div>
@@ -82,16 +176,7 @@ export default function Page() {
                 </div>
                 <div className={`relative ${i % 2 === 1 ? "lg:col-start-1 lg:row-start-1" : ""}`}>
                   <div className="absolute -inset-4 rounded-3xl blur-2xl" style={{ background: "rgba(244,125,1,0.05)" }} />
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl" style={{ border: "1px solid rgba(255,255,255,0.1)" }}>
-                    <Image
-                      src={feat.screenshot}
-                      alt={feat.title}
-                      width={1200}
-                      height={750}
-                      className="w-full h-auto block"
-                      quality={90}
-                    />
-                  </div>
+                  <div className="relative">{mockupMap[feat.mockup]}</div>
                 </div>
               </div>
             ))}
@@ -142,34 +227,6 @@ export default function Page() {
               <div className="mt-12 max-w-sm mx-auto">
                 <BookingModal />
                 <p className="mt-4 text-xs italic tracking-wide" style={{ color: "rgba(244,125,1,0.8)" }}>Built to help our partners win.</p>
-              </div>
-              <div className="mt-12 max-w-xl mx-auto">
-                <div className="relative p-6 lg:p-7 rounded-2xl overflow-hidden text-left" style={{ background: "linear-gradient(135deg, rgba(12,29,43,0.9) 0%, rgba(23,51,70,0.7) 100%)", border: "1px solid rgba(244,125,1,0.2)" }}>
-                  <div className="absolute -top-20 -right-20 w-48 h-48 rounded-full blur-3xl" style={{ background: "rgba(244,125,1,0.08)" }} />
-                  <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
-                    <div className="relative flex-shrink-0 self-center sm:self-start">
-                      <div className="h-20 w-20 rounded-full overflow-hidden" style={{ outline: "2px solid rgba(244,125,1,0.4)", boxShadow: "0 8px 24px rgba(244,125,1,0.2)" }}>
-                        <Image src="/john-calloway.png" alt="John F. Calloway" width={160} height={160} className="h-full w-full object-cover object-top" />
-                      </div>
-                      <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full border-2" style={{ background: "#95c93d", borderColor: "#173346" }} />
-                    </div>
-                    <div className="flex-1 min-w-0 text-center sm:text-left">
-                      <div className="text-[9px] uppercase tracking-[0.25em] mb-1.5" style={{ color: "#f47d01" }}>Your Host</div>
-                      <div className="font-bold text-white text-lg leading-tight">John F. Calloway</div>
-                      <div className="text-xs mt-0.5" style={{ color: "rgba(244,125,1,0.9)" }}>Chief Commercial Officer</div>
-                      <div className="mt-4 pt-4 flex flex-wrap gap-x-4 gap-y-2 justify-center sm:justify-start" style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}>
-                        <a href="tel:+14175226740" className="flex items-center gap-1.5 text-[13px] transition-colors" style={{ color: "#dbe5f1" }}>
-                          <Mail className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: "rgba(244,125,1,0.7)" }} />
-                          <span>417.522.6740</span>
-                        </a>
-                        <a href="mailto:John.c@bulkloads.com" className="flex items-center gap-1.5 text-[13px] transition-colors" style={{ color: "#dbe5f1" }}>
-                          <Mail className="h-3.5 w-3.5" strokeWidth={2.5} style={{ color: "rgba(244,125,1,0.7)" }} />
-                          <span>John.c@bulkloads.com</span>
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

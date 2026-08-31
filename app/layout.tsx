@@ -8,7 +8,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], variable: "--font-space
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Book a Demo — Bulk Insights",
+  title: "Book a Demo | Bulk Insights",
   description:
     "Book a 30-minute demo and we'll pull up real market data for the lanes, commodities, and carriers that matter to your business.",
 };

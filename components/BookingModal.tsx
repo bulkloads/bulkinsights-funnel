@@ -5,9 +5,19 @@ import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
 
-type Variant = "default" | "header" | "hero";
+type Variant = "default" | "header" | "hero" | "portal" | "portalLarge" | "portalLink";
 
-export default function BookingModal({ variant = "default" }: { variant?: Variant }) {
+export default function BookingModal({
+  variant = "default",
+  accent = "#f47d01",
+  label,
+}: {
+  variant?: Variant;
+  /** Modal chrome colour. Defaults to the legacy funnel orange. */
+  accent?: string;
+  /** Overrides the trigger copy. */
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -27,7 +37,33 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
   }, [open]);
 
   const trigger =
-    variant === "header" ? (
+    variant === "portalLink" ? (
+      <button
+        onClick={() => setOpen(true)}
+        className="font-semibold underline underline-offset-2 transition-colors"
+        style={{ color: accent }}
+      >
+        {label ?? "Book a demo"}
+      </button>
+    ) : variant === "portal" ? (
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-2 border px-4 py-2.5 text-[14px] font-semibold tracking-[-0.01em] transition-colors hover:bg-black/[0.04]"
+        style={{ borderColor: "#dde1e7", color: "#12161a", borderRadius: "10px" }}
+      >
+        <Calendar className="h-4 w-4" strokeWidth={2.25} />
+        {label ?? "Book a demo"}
+      </button>
+    ) : variant === "portalLarge" ? (
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center justify-center gap-2 border px-6 py-3 text-[15px] font-semibold tracking-[-0.01em] text-white transition-colors hover:bg-white/10"
+        style={{ borderColor: "rgba(255,255,255,0.28)", borderRadius: "10px" }}
+      >
+        <Calendar className="h-4 w-4" strokeWidth={2.25} />
+        {label ?? "Book a demo"}
+      </button>
+    ) : variant === "header" ? (
       <button
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:-translate-y-px"
@@ -75,11 +111,11 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
           />
 
           <div className="relative w-full max-w-4xl max-h-[92vh] rounded-2xl overflow-hidden shadow-2xl bg-white flex flex-col"
-            style={{ border: "1px solid rgba(244,125,1,0.2)" }}>
+            style={{ border: `1px solid ${accent}33` }}>
             <div className="flex items-center gap-3 px-5 py-4 border-b flex-shrink-0"
               style={{ background: "#0c1d2b", borderColor: "rgba(255,255,255,0.1)" }}>
               <div className="h-9 w-9 rounded-lg flex items-center justify-center"
-                style={{ background: "#f47d01" }}>
+                style={{ background: accent }}>
                 <Calendar className="h-4 w-4" strokeWidth={2.5} style={{ color: "#0c1d2b" }} />
               </div>
               <div className="font-bold text-white text-base leading-tight">Book Your Demo</div>
