@@ -217,8 +217,14 @@ body:has(.portal-scope) ::selection {
 /* ── Market ticker ───────────────────────────────────────────────
    The rail holds the row list twice and slides by exactly half its
    width, so the wrap is invisible and the loop never resets visibly.
-   Duration scales with content length rather than being a fixed speed,
-   which keeps the pace even if rows are added or removed. */
+
+   The duration is FIXED, so scroll speed is proportional to how many
+   rows there are: one full pass takes 48s whether the rail is short or
+   long. That is fine for a stable row set and worth re-timing if the
+   count changes much — the rows now come from the Insights feed, which
+   drops labels it cannot measure, so the width is not fully ours to
+   pick. (An earlier version of this comment claimed the duration scaled
+   with content length. It never did.) */
 
 .ticker-rail {
   animation: ticker-scroll 48s linear infinite;

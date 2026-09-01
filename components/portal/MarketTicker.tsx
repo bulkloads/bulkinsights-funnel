@@ -49,7 +49,7 @@ export default async function MarketTicker() {
   const { rows, period, isLive } = await getTicker();
 
   const track = (
-    <div className="ticker-track flex items-center">
+    <div className="flex items-center">
       {rows.map((r) => (
         <Cell key={r.label} row={r} />
       ))}
