@@ -45,13 +45,40 @@ function Cell({ row }: { row: TickerRow }) {
  * the illustrative rows with `isLive` false, and the strip below then labels
  * itself indicative instead of live.
  */
+
+/**
+ * Cells each half of the rail must hold for the loop to look continuous.
+ *
+ * The seamless wrap depends on one copy of the track spanning the viewport:
+ * translating -50% of a track narrower than the screen scrolls a band of empty
+ * ink across the hero. The row count is no longer ours to choose — the feed
+ * suppresses labels it cannot measure, so a quiet day can return two or three —
+ * so short sets are repeated up to this many cells. Sized for a wide desktop
+ * against the ~150px a cell occupies.
+ */
+const MIN_CELLS = 12;
+
 export default async function MarketTicker() {
   const { rows, period, isLive } = await getTicker();
 
+  // Repeat rather than stretch: the alternative is widening cells to fill,
+  // which makes a thin feed look deliberate instead of thin.
+  //
+  // Guarded on empty because this loop would otherwise never terminate, and
+  // it runs during render on the server — a hung build, not a blank strip.
+  // `getTicker` cannot return an empty set today (`parseRows` rejects one and
+  // the fallback is a constant), which is exactly why the guard is worth
+  // having: nothing here would notice if that changed upstream.
+  const cells: TickerRow[] = [];
+  if (rows.length > 0) {
+    while (cells.length < MIN_CELLS) cells.push(...rows);
+  }
+
   const track = (
     <div className="flex items-center">
-      {rows.map((r) => (
-        <Cell key={r.label} row={r} />
+      {cells.map((r, i) => (
+        // Repeats make the label non-unique, so the index carries identity.
+        <Cell key={`${r.label}-${i}`} row={r} />
       ))}
     </div>
   );

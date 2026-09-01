@@ -38,6 +38,21 @@ function indicative(): TickerData {
 }
 
 /**
+ * Fall back, and say why.
+ *
+ * Silence here is the dangerous failure mode: the page still renders, the
+ * strip still looks like instrumentation, and it shows the same nine
+ * hardcoded percentages forever. A typo in `TICKER_FEED_SECRET` is
+ * indistinguishable from a working deploy unless something is written down —
+ * and because the feed is unlisted, a wrong secret answers 404 exactly as a
+ * wrong URL does. One line on the server log is what makes it findable.
+ */
+function degraded(reason: string): TickerData {
+  console.warn(`[ticker] falling back to indicative rows: ${reason}`);
+  return indicative();
+}
+
+/**
  * Narrow an unknown JSON body to ticker rows.
  *
  * The payload crosses a network boundary, so its shape is checked rather than
@@ -81,25 +96,47 @@ function parsePeriod(body: unknown): string {
  */
 export async function getTicker(): Promise<TickerData> {
   const secret = process.env.TICKER_FEED_SECRET;
-  if (!secret) return indicative();
+  if (!secret) return degraded("TICKER_FEED_SECRET is not set");
 
   const url = process.env.INSIGHTS_TICKER_URL ?? DEFAULT_TICKER_URL;
 
+  // The timeout is a race rather than an `AbortSignal` on the request.
+  // `signal` is documented as interfering with Next's fetch cache, and
+  // losing the cache here would turn "one upstream request an hour for the
+  // whole site" into one per render against a private endpoint. The race
+  // gives the same ceiling without touching the request options.
+  //
+  // The timer is cleared in `finally` so a fast response does not leave a
+  // five-second handle pending in a serverless invocation.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
   try {
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${secret}` },
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      // ISR: one upstream request per revalidation window for the whole site.
-      next: { revalidate: REVALIDATE_SECONDS },
-    });
-    if (!res.ok) return indicative();
+    const res = await Promise.race([
+      fetch(url, {
+        headers: { Authorization: `Bearer ${secret}` },
+        // ISR: one upstream request per revalidation window for the whole site.
+        next: { revalidate: REVALIDATE_SECONDS },
+      }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`timed out after ${TIMEOUT_MS}ms`)),
+          TIMEOUT_MS,
+        );
+      }),
+    ]);
+    // A 404 is what a wrong secret gets, same as an unknown path — so this
+    // line is the difference between a misconfigured deploy and a working
+    // one, and it is worth saying out loud.
+    if (!res.ok) return degraded(`feed answered ${res.status}`);
 
     const body: unknown = await res.json();
     const rows = parseRows(body);
-    if (!rows) return indicative();
+    if (!rows) return degraded("feed body did not parse as ticker rows");
 
     return { rows, period: parsePeriod(body), isLive: true };
-  } catch {
-    return indicative();
+  } catch (error) {
+    return degraded(error instanceof Error ? error.message : "feed request failed");
+  } finally {
+    clearTimeout(timer);
   }
 }
