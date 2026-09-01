@@ -1,14 +1,21 @@
 /**
- * ⚠ HERO VIDEOS ARE PLACEHOLDER-WEIGHT. The four files currently in
- * /public/media are the original cuts: 31-37 MB each (138 MB total),
- * each still carrying an unused AAC audio track. They are fine for
- * review and must not ship. Web exports are being produced from the
- * masters at ~5 MB with no audio; swap the files in place (same names)
- * and replace the posters with the frame-1 stills that come with them.
+ * ⚠ HERO VIDEO IS OFF UNTIL THE WEB EXPORTS LAND. Every `video` below is
+ * `null`, so the heroes render their posters and nothing else.
+ *
+ * It is off because the files do not exist. The original cuts (31-37 MB
+ * each, 138 MB total, each still carrying an unused AAC audio track) were
+ * never committed and are not in /public/media, so pointing at them made
+ * every desktop hero mount a <video> whose src 404s. That failed quietly
+ * — the poster keeps showing — which is exactly why it would have shipped.
+ *
+ * To turn it back on: drop the ~5 MB no-audio web exports into
+ * /public/media as hero-{home,carriers,brokers,shippers}.mp4, set `video`
+ * on each slot below, and replace the posters with the frame-1 stills that
+ * come with them. Do not set `video` before the file is committed.
  *
  * hero-home.jpg is a true frame-0 capture, so that one starts cleanly.
  * The other three were pulled with the macOS thumbnailer, which grabs a
- * representative frame rather than frame 1, so those start with a
+ * representative frame rather than frame 1, so those will start with a
  * visible jump until the real posters land.
  */
 
@@ -48,7 +55,7 @@ export type MediaSlot = {
 export const media = {
   /* ── Hero slots (video) ─────────────────────────────────────── */
   homeHero: {
-    video: "/media/hero-home.mp4",
+    video: null,
     poster: "/media/hero-home.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -59,7 +66,7 @@ export const media = {
     focal: "50% 45%",
   },
   carriersHero: {
-    video: "/media/hero-carriers.mp4",
+    video: null,
     poster: "/media/hero-carriers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -70,7 +77,7 @@ export const media = {
     focal: "50% 45%",
   },
   brokersHero: {
-    video: "/media/hero-brokers.mp4",
+    video: null,
     poster: "/media/hero-brokers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -81,7 +88,7 @@ export const media = {
     focal: "50% 40%",
   },
   shippersHero: {
-    video: "/media/hero-shippers.mp4",
+    video: null,
     poster: "/media/hero-shippers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:

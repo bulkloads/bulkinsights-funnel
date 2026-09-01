@@ -4,17 +4,26 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
+import { brand } from "@/lib/brand";
 
-type Variant = "default" | "header" | "hero" | "portal" | "portalLarge" | "portalLink";
+type Variant = "default" | "header" | "hero" | "portalLink";
 
 export default function BookingModal({
   variant = "default",
-  accent = "#f47d01",
+  accent = brand.orange,
   label,
 }: {
   variant?: Variant;
-  /** Modal chrome colour. Defaults to the legacy funnel orange. */
-  accent?: string;
+  /**
+   * Modal chrome colour. Defaults to THE BulkLoads orange — see lib/brand,
+   * which keeps exactly one.
+   *
+   * Typed as a hex literal because it is concatenated with an alpha suffix
+   * below. `rgb(...)`, `hsl(...)` or a CSS variable would produce an
+   * invalid declaration that the browser drops silently, taking the
+   * modal's border with it.
+   */
+  accent?: `#${string}`;
   /** Overrides the trigger copy. */
   label?: string;
 }) {
@@ -43,24 +52,6 @@ export default function BookingModal({
         className="font-semibold underline underline-offset-2 transition-colors"
         style={{ color: accent }}
       >
-        {label ?? "Book a demo"}
-      </button>
-    ) : variant === "portal" ? (
-      <button
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 border px-4 py-2.5 text-[14px] font-semibold tracking-[-0.01em] transition-colors hover:bg-black/[0.04]"
-        style={{ borderColor: "#dde1e7", color: "#12161a", borderRadius: "10px" }}
-      >
-        <Calendar className="h-4 w-4" strokeWidth={2.25} />
-        {label ?? "Book a demo"}
-      </button>
-    ) : variant === "portalLarge" ? (
-      <button
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center gap-2 border px-6 py-3 text-[15px] font-semibold tracking-[-0.01em] text-white transition-colors hover:bg-white/10"
-        style={{ borderColor: "rgba(255,255,255,0.28)", borderRadius: "10px" }}
-      >
-        <Calendar className="h-4 w-4" strokeWidth={2.25} />
         {label ?? "Book a demo"}
       </button>
     ) : variant === "header" ? (

@@ -36,7 +36,15 @@ export default function Photo({
     );
   }
 
-  return <MediaPlaceholder brief={item.brief} tone={tone} className={className} />;
+  // Wrapped to match the filled branch. `Image fill` is absolutely
+  // positioned; a bare placeholder is not, so without this the slot
+  // changes layout behaviour the moment real art lands — correct in
+  // review, wrong in production, or the reverse.
+  return (
+    <div className="absolute inset-0">
+      <MediaPlaceholder brief={item.brief} tone={tone} className={className} />
+    </div>
+  );
 }
 
 /**

@@ -96,5 +96,11 @@ export default function HeroMedia({
     );
   }
 
-  return <MediaPlaceholder brief={item.brief} tone="dark" kind="Hero video" className={className} />;
+  // Same `absolute inset-0` wrapper as both filled branches above, so an
+  // empty slot occupies the hero background rather than joining the flow.
+  return (
+    <div className="absolute inset-0">
+      <MediaPlaceholder brief={item.brief} tone="dark" kind="Hero video" className={className} />
+    </div>
+  );
 }

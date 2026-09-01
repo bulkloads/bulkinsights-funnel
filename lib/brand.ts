@@ -70,9 +70,21 @@ export const brand = {
  * deployment of Insights; the /api/auth/* paths are Insights' contract.
  * NEXT_PUBLIC_ vars are inlined at build time, so changing the value
  * requires a redeploy.
+ *
+ * An EMPTY override falls back too, which `??` would not do. A variable
+ * that exists with a blank value is ordinary in Vercel, and `"" ?? x` is
+ * `""` — which would leave these as bare paths like `/api/auth/sign-in`.
+ * `next/link` reads a leading slash as an internal route, so every Sign
+ * in and Sign up control would prefetch and then 404 against this site
+ * instead of reaching WorkOS, and being build-time inlined it would stay
+ * broken until someone redeployed.
  */
+const DEFAULT_INSIGHTS_ORIGIN = "https://insights.bulkloads.com";
+
+const configuredOrigin = process.env.NEXT_PUBLIC_INSIGHTS_URL?.trim();
+
 const INSIGHTS_ORIGIN = (
-  process.env.NEXT_PUBLIC_INSIGHTS_URL ?? "https://insights.bulkloads.com"
+  configuredOrigin || DEFAULT_INSIGHTS_ORIGIN
 ).replace(/\/+$/, "");
 
 export const SIGN_IN_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-in`;

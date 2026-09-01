@@ -12,8 +12,16 @@ npm run dev
 
 Then open **http://localhost:3000**.
 
-Node 18+. No environment variables, no database, no API keys. Every page
-is statically prerendered.
+Node 18+. No database. Every page is statically prerendered.
+
+One optional environment variable:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_INSIGHTS_URL` | `https://insights.bulkloads.com` | Origin the Sign in / Sign up buttons point at. Set it to an Insights preview deployment to test the handoff. |
+
+It is read in `lib/brand.ts`. `NEXT_PUBLIC_` values are inlined at build
+time, so changing it needs a redeploy, not just a restart.
 
 ## What's where
 

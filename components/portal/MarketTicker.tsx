@@ -40,7 +40,7 @@ function Cell({ row }: { row: TickerRow }) {
  */
 export default function MarketTicker() {
   const track = (
-    <div className="ticker-track flex items-center">
+    <div className="flex items-center">
       {rows.map((r) => (
         <Cell key={r.label} row={r} />
       ))}
