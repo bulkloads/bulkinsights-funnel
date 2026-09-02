@@ -112,9 +112,10 @@ export default function PortalPage() {
                 </div>
               </div>
 
-              {/* Offset downward and run out toward the viewport edge. */}
+              {/* Offset downward; width capped so a wide viewport doesn't
+                  upscale the screenshot past its native size. */}
               <div className="min-w-0 lg:col-span-5 lg:translate-y-6">
-                <div className="bleed-right">
+                <div className="bleed-right lg:max-w-[640px]">
                   <RatingMockup />
                 </div>
               </div>
