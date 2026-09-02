@@ -112,11 +112,13 @@ export default function PortalPage() {
                 </div>
               </div>
 
-              {/* Offset downward; width capped so a wide viewport doesn't
-                  upscale the screenshot past its native size. */}
+              {/* Offset downward and bled past the container edge. The
+                  screenshot's own ceiling holds it at the hero width; see
+                  the `homeHero` slot in mockups.tsx. This is the LCP image,
+                  hence `priority`. */}
               <div className="min-w-0 lg:col-span-5 lg:translate-y-6">
-                <div className="bleed-right lg:max-w-[640px]">
-                  <RatingMockup />
+                <div className="bleed-right">
+                  <RatingMockup slot="homeHero" priority />
                 </div>
               </div>
             </div>

@@ -47,9 +47,13 @@ components/portal/
   IcpPage.tsx   shared template for the three role pages
   HeroMedia.tsx hero video with poster fallback
   MarketTicker.tsx
-  mockups.tsx   product UI mockups (Rating Tool, Margin, Commodity Trends)
+  mockups.tsx   product screenshots, their layout slots and image priority
   Photo.tsx     still image slots
 app/globals.css design system: type scale, focus, reduced motion
+app/error.tsx   branded boundary for a client render error
+pages/500.tsx   branded server error page. The one pages-router file, because
+                it is the only thing Next consults for a 500; the note in it
+                explains why app/error.tsx does not cover that case.
 ```
 
 The previous design (the old `/` and `/preview` pages) has been removed;

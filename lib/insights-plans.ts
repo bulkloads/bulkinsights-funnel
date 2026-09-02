@@ -13,9 +13,10 @@
  * ```jsonc
  * {
  *   "version": 1,
- *   "source": "stripe" | "catalog" | "mixed",  // where the PRICES came from
+ *   "source": "stripe" | "catalog" | "mixed",  // where the MONTHLY prices came from
  *   "currency": "usd",
- *   "interval": "month",
+ *   "interval": "month",                       // what `tiers` below are priced at
+ *   "intervals": ["month", "year"],            // yearly — read below, ignored here
  *   "maxSeats": 6,                             // self-serve ceiling
  *   "orgTypes": {
  *     "carrier": [
@@ -27,9 +28,11 @@
  *         "buildsOn": "pricing_only" | null,
  *         "leadIn": "Everything in Pricing, plus" | null,
  *         "eligibilityGated": false,           // true only for Owner Operator
- *         "tiers": [{ "upTo": 3 | "inf", "unitAmount": 10900 }],
+ *         "tiers": [{ "upTo": 3 | "inf", "unitAmount": 10900 }],   // monthly
+ *         "yearlyTiers": [{ "upTo": 3, "unitAmount": 130800 }],    // ignored here
  *         "features": ["Rate estimates", "…"], // full list, not the increment
- *         "source": "stripe" | "catalog"
+ *         "source": "stripe" | "catalog",
+ *         "yearlySource": "stripe" | "catalog" // ignored here
  *       }
  *     ],
  *     "broker": [ … ], "shipper": [ … ]
@@ -39,6 +42,28 @@
  *
  * Prices are in cents, per seat, per month, and volume-tiered: crossing a band
  * reprices every seat.
+ *
+ * ── Yearly, and why nothing here reads it ────────────────────────────────────
+ *
+ * Insights sells two billing intervals and describes both: `intervals` lists
+ * them and each plan carries `yearlyTiers` / `yearlySource` beside the monthly
+ * `tiers`. This site renders **monthly only** — the cards say "per user each
+ * month" and `validatePlansResponse` refuses a payload whose `interval` is
+ * anything but `month` — so those fields are present and deliberately ignored,
+ * not missing and not unnoticed. A yearly toggle is future work; when it lands,
+ * `WirePlan` grows `yearlyTiers` and `lib/plans.ts` grows somewhere to put it.
+ *
+ * (Insights also still ships a `monthsPerYear: 12`, which is being removed on
+ * that side. Nothing here has ever read it, and nothing should: multiplying a
+ * monthly band by twelve is exactly the coupling `yearlyTiers` exists to
+ * remove, and it becomes a lie the day yearly is priced on its own.)
+ *
+ * Unknown fields are ignored *by construction* — the validator reads the keys
+ * it needs and copies them into a fresh object, so an additive change on the
+ * Insights side cannot break a build of this site. **Keep it that way.** A
+ * whole-payload refusal here means shipping the static mirror, and Insights
+ * ships additively precisely because this validator is on the far side of a
+ * deploy it does not control.
  *
  * ── Why fetch at all ─────────────────────────────────────────────────────────
  *
@@ -55,16 +80,22 @@
  * that, a price change in Insights reached this site only on the next deploy —
  * an unbounded drift window on the one thing this file exists to keep honest.
  *
- * ── Why it can never break the build ─────────────────────────────────────────
+ * ── What a failure does ──────────────────────────────────────────────────────
  *
- * A marketing site that will not deploy because another app was briefly
- * unreachable is a worse failure than a slightly stale price. At **build** time
- * every failure — unreachable host, non-200, malformed body, a shape this
- * version does not understand — degrades to `lib/plans.ts` and prints a loud
- * warning. It never throws and never returns an empty plan list.
+ * One rule decides it: **is there a last good render to keep?**
  *
- * At **revalidation** it does the opposite, and deliberately: see
- * {@link isBuildPhase}.
+ * Where there is not — `next build`, and `next dev`, where every request
+ * renders from scratch — every failure (unreachable host, non-200, malformed
+ * body, a shape this version does not understand) degrades to `lib/plans.ts`
+ * and prints a loud warning. It does not throw and never returns an empty plan
+ * list: a marketing site that will not deploy, or a dev server that 500s,
+ * because another app was briefly unreachable is a worse failure than a
+ * slightly stale price.
+ *
+ * Where there is one — a production server regenerating an already-rendered
+ * ICP page — it throws instead, which is what keeps that page. See
+ * {@link hasLastGoodRender}, and {@link FAILURE_COOLDOWN_MS} for what stops a
+ * long outage turning into a fetch on every request.
  */
 
 import { INSIGHTS_ORIGIN, ORG_TYPES, type OrgType } from "@/lib/brand";
@@ -82,8 +113,18 @@ import {
 /** Contract version this build understands. A different one is a hard refusal. */
 const SUPPORTED_VERSION = 1;
 
-/** The build must not sit on an unreachable host. */
-const FETCH_TIMEOUT_MS = 10_000;
+/**
+ * How long to wait on an unreachable host before giving up.
+ *
+ * Three seconds, not ten. This is not only a build-time budget: the same fetch
+ * runs on a production server during ISR regeneration, and there the wait is
+ * held by the request that triggered it. Ten seconds of that, on every attempt,
+ * for as long as Insights is down, is a real cost paid by real visitors to
+ * refresh a price that has not changed. The endpoint is a cached JSON document
+ * off a CDN; three seconds is already generous for it, and a slow answer is
+ * indistinguishable from an absent one as far as this page is concerned.
+ */
+const FETCH_TIMEOUT_MS = 3_000;
 
 /**
  * How long a rendered pricing page may be before it is regenerated.
@@ -410,30 +451,90 @@ const STATIC_RESULT: LoadedPlans = {
 };
 
 /**
- * Whether this render is `next build` rather than an ISR regeneration.
+ * Whether this render is `next build`.
  *
- * The distinction decides what a failure means, and the two answers are
- * opposite:
- *
- * - **At build** there is no previously rendered page to keep, so falling back
- *   to the mirror is the only way to produce a pricing section at all. It also
- *   must not fail: a marketing site that will not deploy because another app
- *   had a bad minute is a worse outcome than a stale price.
- *
- * - **At revalidation** there IS a good page already on disk, rendered from
- *   real prices. Next's contract is that a regeneration which *throws* is
- *   discarded — the last successful render keeps being served and the attempt
- *   is retried on a later request. So the honest move is to throw and keep the
- *   good page, rather than "succeed" with mirror prices and overwrite fresher,
- *   truer numbers with older ones. Swallowing the error would make an Insights
- *   blip permanently downgrade a page that was already correct.
- *
- * `NEXT_PHASE` is set to `phase-production-build` by `next build` and is absent
- * in the server runtime. Every ICP page is prerendered at build, so the throw
- * path always has a last good render behind it.
+ * Two signals, either of which is enough. `NEXT_PHASE` is Next's own: `next
+ * build` sets it to `phase-production-build` before generating pages, and no
+ * other command sets it at all. `PLANS_BUILD_PHASE` is ours, set on the `build`
+ * script in package.json — belt and braces, because `NEXT_PHASE` is a framework
+ * internal that can be renamed in a minor release, and the failure mode if it
+ * silently were is a build that throws instead of falling back. Neither is
+ * `NEXT_PUBLIC_`, so neither is inlined into the bundle: both are genuine
+ * runtime reads that are simply absent when a server serves a request.
  */
 function isBuildPhase(): boolean {
-  return process.env.NEXT_PHASE === "phase-production-build";
+  return (
+    process.env.NEXT_PHASE === "phase-production-build" ||
+    process.env.PLANS_BUILD_PHASE === "1"
+  );
+}
+
+/**
+ * Whether a failure here can be thrown away rather than papered over.
+ *
+ * Next's contract is that a regeneration which *throws* is discarded: the last
+ * successful render keeps being served and the attempt is retried on a later
+ * request. So where a good page already exists, throwing is the honest move —
+ * better than "succeeding" with mirror prices and overwriting fresher, truer
+ * numbers with older ones, which would let one bad minute at Insights
+ * permanently downgrade a page that was already correct.
+ *
+ * That is only true on a **production server**. Two other contexts run this
+ * exact code with no last good render behind them, and both must degrade:
+ *
+ * - `next build`, which has nothing rendered yet. Falling back to the mirror is
+ *   the only way to produce a pricing section at all, and a marketing site that
+ *   will not deploy because another app had a bad minute is the worse outcome.
+ *
+ * - `next dev`, which renders every request from scratch and caches nothing to
+ *   fall back to. This used to be missed — the check was `NEXT_PHASE` alone,
+ *   which `next dev` never sets — so any local failure took the throw path and
+ *   500'd all three ICP pages, with no error boundary and after a full fetch
+ *   timeout per reload. The header of this file promised the opposite.
+ */
+function hasLastGoodRender(): boolean {
+  return !isBuildPhase() && process.env.NODE_ENV === "production";
+}
+
+/**
+ * How long one failure suppresses the next attempt.
+ *
+ * Next does not retry a failed regeneration on a timer; it retries on the next
+ * *request*, and it collapses the retry window to do it — a failed regeneration
+ * re-writes the entry's revalidate as `min(max(previous, 3), 30)` seconds. So
+ * the hourly poll this file is built around becomes a poll every 30 seconds for
+ * as long as Insights is unwell, each one holding a request open for the fetch
+ * timeout. This is the brake on that: inside the window the failure path is
+ * taken immediately, without a fetch.
+ *
+ * A minute, so an outage costs at most one attempt per minute per instance and
+ * a recovery is picked up within one.
+ *
+ * This is module-level state, which the note on {@link loadPlans} warns against
+ * — for *results*. The distinction is what is remembered: a memoised success
+ * would serve a warm lambda the same prices forever and defeat ISR, whereas
+ * this remembers only that the last call failed, expires on its own, and can
+ * never put a price on a page. It is also deliberately not honoured at build
+ * (see {@link loadPlans}).
+ */
+const FAILURE_COOLDOWN_MS = 60_000;
+
+let cooldownUntil = 0;
+let cooldownReason = "";
+
+/** The reason the endpoint is being left alone, or null to go ahead and ask. */
+function coolingDown(): string | null {
+  return Date.now() < cooldownUntil ? cooldownReason : null;
+}
+
+function beginCooldown(reason: string): void {
+  cooldownUntil = Date.now() + FAILURE_COOLDOWN_MS;
+  cooldownReason = reason;
+}
+
+function endCooldown(): void {
+  cooldownUntil = 0;
+  cooldownReason = "";
 }
 
 /**
@@ -456,56 +557,90 @@ function banner(headline: string, lines: ReadonlyArray<string>): void {
 }
 
 /**
- * Fell back to the mirror. The prices on this build are this repo's copy.
+ * Fell back to the mirror. The prices on this render are this repo's copy.
  *
  * Warns per occurrence rather than once per process: the three ICP pages each
  * resolve their own prices, so three of these means three pages shipped stale,
  * and collapsing that to one line understated it.
+ *
+ * `quiet` is the cooldown repeat, where the banner has already been printed
+ * once and the only news is that we did not bother asking again.
  */
-function warnFallback(reason: string): LoadedPlans {
+function warnFallback(reason: string, quiet: boolean): LoadedPlans {
+  if (quiet) {
+    console.warn(`PLANS: still cooling down; serving the static mirror. ${reason}`);
+    return STATIC_RESULT;
+  }
   banner("could not use the live catalog from Insights.", [
     reason,
     "Falling back to the static mirror in lib/plans.ts, which may be out of",
-    "date. Prices on this build are an advert, not a quote — checkout resolves",
+    "date. Prices on this render are an advert, not a quote — checkout resolves",
     "the real price from Stripe either way.",
   ]);
   return STATIC_RESULT;
 }
 
 /**
- * A failure during ISR regeneration. Throwing keeps the last good page.
+ * Abandons an ISR regeneration so the last good page is kept.
+ *
+ * A class rather than a message prefix. This used to be an ordinary `Error`
+ * re-identified downstream by `err.message.startsWith("plans revalidation
+ * failed")`, which made a line of prose load-bearing: rewording the sentence
+ * would have silently inverted keep-the-good-page into overwrite-it-with-the-
+ * mirror. `loadPlans` no longer decides anything inside a `try`, so nothing has
+ * to recognise this at all — but where something does, it is an `instanceof`.
+ */
+class PlansRevalidationError extends Error {
+  constructor(reason: string) {
+    super(`plans revalidation failed: ${reason}`);
+    this.name = "PlansRevalidationError";
+  }
+}
+
+/**
+ * A failure on a production server. Throwing keeps the last good page.
  *
  * Deliberately not the fallback banner: nothing was replaced by mirror prices,
  * and saying so would send someone looking for a stale deploy that did not
  * happen.
  */
-function throwForRevalidation(reason: string): never {
-  banner("could not refresh prices from Insights.", [
-    reason,
-    "Keeping the last successfully rendered pricing page rather than replacing",
-    "live prices with the static mirror. Next will retry on a later request.",
-  ]);
-  throw new Error(`plans revalidation failed: ${reason}`);
-}
-
-/** Fall back at build, keep the good render at revalidation. */
-function degrade(reason: string): LoadedPlans {
-  return isBuildPhase() ? warnFallback(reason) : throwForRevalidation(reason);
+function throwForRevalidation(reason: string, quiet: boolean): never {
+  if (quiet) {
+    console.warn(`PLANS: still cooling down; keeping the last good page. ${reason}`);
+  } else {
+    banner("could not refresh prices from Insights.", [
+      reason,
+      "Keeping the last successfully rendered pricing page rather than replacing",
+      "live prices with the static mirror. Next will retry on a later request.",
+    ]);
+  }
+  throw new PlansRevalidationError(reason);
 }
 
 /**
- * Read the plans from Insights.
+ * Keep the good render where there is one; fall back where there is not.
  *
- * Not memoised in this module. Next's data cache already dedupes this fetch
- * across the three pages of a build and is what makes `revalidate` mean
- * anything — a module-level memo would sit in front of it and serve a warm
- * lambda the same prices forever, quietly defeating the ISR this file just
- * gained. It would also cache a *failure* as though it had succeeded, which is
- * how one bad minute at build time used to pin the mirror for the whole
- * process.
+ * Called only from `loadPlans`, and only *outside* its `try`. That placement is
+ * the point: when this throws, the throw travels straight out to Next rather
+ * than landing in the same function's own catch to be recognised and re-thrown.
  */
-export async function loadPlans(): Promise<LoadedPlans> {
-  let body: unknown;
+function degrade(reason: string, quiet = false): LoadedPlans {
+  if (hasLastGoodRender()) throwForRevalidation(reason, quiet);
+  return warnFallback(reason, quiet);
+}
+
+/** A body off the wire, or the reason there is not one. */
+type FetchOutcome = { ok: true; body: unknown } | { ok: false; reason: string };
+
+/**
+ * Ask Insights, and report rather than decide.
+ *
+ * Every failure comes back as a value. Nothing in here calls `degrade`, so
+ * nothing it throws is ever this module's own control flow — which is what lets
+ * the catch below be an ordinary catch, with no error identified by its
+ * message and no re-throw to get a decision back out of it.
+ */
+async function fetchPlans(): Promise<FetchOutcome> {
   try {
     const res = await fetch(`${INSIGHTS_ORIGIN}${PLANS_PATH}`, {
       // The page's `revalidate` and the data's expiry are the same number, so a
@@ -514,17 +649,60 @@ export async function loadPlans(): Promise<LoadedPlans> {
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
-    if (!res.ok) return degrade(`the endpoint answered ${res.status} ${res.statusText}.`);
-    body = await res.json();
+    if (!res.ok) {
+      return { ok: false, reason: `the endpoint answered ${res.status} ${res.statusText}.` };
+    }
+    return { ok: true, body: await res.json() };
   } catch (err) {
-    // A throw from `throwForRevalidation` must not be caught and turned back
-    // into a fallback by this very handler.
-    if (err instanceof Error && err.message.startsWith("plans revalidation failed")) throw err;
-    return degrade(`the request failed: ${err instanceof Error ? err.message : String(err)}.`);
+    // Belt and braces against a future edit moving a decision back in here:
+    // this module's own control-flow error has an identity now, and must never
+    // be flattened into "the request failed".
+    if (err instanceof PlansRevalidationError) throw err;
+    return {
+      ok: false,
+      reason: `the request failed: ${err instanceof Error ? err.message : String(err)}.`,
+    };
+  }
+}
+
+/**
+ * Read the plans from Insights.
+ *
+ * The *result* is not memoised in this module. Next's data cache already
+ * dedupes this fetch across the three pages of a build and is what makes
+ * `revalidate` mean anything — a module-level memo would sit in front of it and
+ * serve a warm lambda the same prices forever, quietly defeating the ISR this
+ * file exists for. It would also cache a *failure* as though it had succeeded,
+ * which is how one bad minute at build time used to pin the mirror for a whole
+ * process. The only thing remembered between calls is a recent failure, which
+ * expires by itself and can never put a price on a page; see
+ * {@link FAILURE_COOLDOWN_MS}.
+ */
+export async function loadPlans(): Promise<LoadedPlans> {
+  // A build always asks, however recently something failed. Its three page
+  // renders are not traffic, the cooldown would save at most a few seconds, and
+  // the cost of honouring it is the regression this file already warns about:
+  // one bad moment pinning the mirror across a whole deploy. (Static generation
+  // also runs in worker processes, so the state would not be shared anyway.)
+  const cooling = isBuildPhase() ? null : coolingDown();
+  if (cooling !== null) return degrade(cooling, true);
+
+  const fetched = await fetchPlans();
+  if (!fetched.ok) {
+    beginCooldown(fetched.reason);
+    return degrade(fetched.reason);
   }
 
-  const validated = validatePlansResponse(body);
-  if (!validated.ok) return degrade(`the response did not validate: ${validated.reason}.`);
+  const validated = validatePlansResponse(fetched.body);
+  if (!validated.ok) {
+    // A payload this build cannot read is a failure like any other: asking
+    // again in a hot loop will not make it readable.
+    const reason = `the response did not validate: ${validated.reason}.`;
+    beginCooldown(reason);
+    return degrade(reason);
+  }
+
+  endCooldown();
 
   const warnings: Array<string> = [];
   const plans = toPlans(validated.value, (message) => warnings.push(message));

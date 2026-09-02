@@ -18,7 +18,7 @@ export const metadata: Metadata = {
  *
  * The pricing fetch passes the same window, so the page and its data expire
  * together. A regeneration that cannot reach Insights throws and leaves the
- * last good render in place; see `isBuildPhase` in lib/insights-plans.ts.
+ * last good render in place; see `hasLastGoodRender` in lib/insights-plans.ts.
  *
  * Written as a literal because Next reads this by static analysis and refuses
  * an identifier. The alias below is what keeps it equal to

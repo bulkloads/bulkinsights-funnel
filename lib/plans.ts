@@ -19,8 +19,19 @@
  *
  * Sourced 2026-09-01 from the Insights `feat/insights-front-door` branch.
  *
- * Prices are per seat per month, in cents, and volume-tiered: crossing a band
- * reprices every seat, not just the ones above the line.
+ * Prices are **per seat per month**, in cents, and volume-tiered: crossing a
+ * band reprices every seat, not just the ones above the line. Every figure in
+ * this file, every `PlanTier` in it, and every price the cards render is
+ * monthly, which is why `PricingSection` can write "per user each month" as a
+ * constant beside the number.
+ *
+ * Insights also sells the same packages yearly and its endpoint reports those
+ * bands (`yearlyTiers`, see `lib/insights-plans.ts`). This site does not show
+ * them and this mirror does not carry them: a yearly toggle is future work, and
+ * it is a real piece of work rather than a multiplication, because a yearly
+ * band is its own price and is free to stop being twelve monthly ones. When it
+ * lands, `PlanTier` grows a second set of bands here and the cards grow a
+ * control to switch between them.
  */
 
 import type { OrgType } from "@/lib/brand";
