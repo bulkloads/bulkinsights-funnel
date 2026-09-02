@@ -2,9 +2,9 @@ import { Check } from "lucide-react";
 import AccountLink from "@/components/portal/AccountLink";
 import { Eyebrow } from "@/components/portal/shared";
 import { brand, type OrgType } from "@/lib/brand";
+import { loadPlans } from "@/lib/insights-plans";
 import {
   DEFAULT_SEATS,
-  MAX_SELF_SERVE_SEATS,
   entryRate,
   formatUsdCents,
   highlightsFor,
@@ -22,9 +22,17 @@ import {
  * lives on each ICP page rather than at `/pricing`. Each card carries its own
  * package key through sign-up, so the plan picker on `/upgrade` opens on the
  * one that was clicked instead of asking again.
+ *
+ * The figures come from Insights (`lib/insights-plans.ts`), fetched while this
+ * page is prerendered and refreshed by the ICP page's `revalidate`; they fall
+ * back to the static mirror in `lib/plans.ts` when it cannot be reached at
+ * build time. Async for that reason and no other: it is a server component, so
+ * the await happens during prerender and the rendered markup is the same
+ * either way.
  */
-export default function PricingSection({ orgType }: { orgType: OrgType }) {
-  const plans = plansFor(orgType);
+export default async function PricingSection({ orgType }: { orgType: OrgType }) {
+  const { plans: catalog, maxSeats } = await loadPlans();
+  const plans = plansFor(orgType, catalog);
   const shown = plans.map((p) => p.key);
 
   return (
@@ -47,13 +55,19 @@ export default function PricingSection({ orgType }: { orgType: OrgType }) {
           }`}
         >
           {plans.map((plan) => (
-            <PlanCard key={plan.key} plan={plan} orgType={orgType} shown={shown} />
+            <PlanCard
+              key={plan.key}
+              plan={plan}
+              orgType={orgType}
+              shown={shown}
+              catalog={catalog}
+            />
           ))}
         </div>
 
         <p className="mt-8 text-[13px]" style={{ color: brand.textMuted }}>
           Prices in USD, billed monthly. Self-serve covers up to{" "}
-          {MAX_SELF_SERVE_SEATS} users; for a larger team call{" "}
+          {maxSeats} users; for a larger team call{" "}
           <a href="tel:18005189240" className="underline underline-offset-2">
             1-800-518-9240
           </a>{" "}
@@ -68,10 +82,13 @@ function PlanCard({
   plan,
   orgType,
   shown,
+  catalog,
 }: {
   plan: Plan;
   orgType: OrgType;
   shown: ReadonlyArray<Plan["key"]>;
+  /** Every plan on this build, so a card can resolve the one it builds on. */
+  catalog: ReadonlyArray<Plan>;
 }) {
   const tiers = tiersFor(plan, orgType);
   // Belt and braces: `plansFor` already filtered to plans this org type buys.
@@ -79,7 +96,7 @@ function PlanCard({
 
   const rate = entryRate(tiers);
   const discount = volumeBreak(tiers);
-  const { leadIn, features } = highlightsFor(plan, shown);
+  const { leadIn, features } = highlightsFor(plan, shown, catalog);
 
   return (
     <div

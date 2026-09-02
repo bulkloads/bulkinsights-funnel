@@ -83,7 +83,13 @@ const DEFAULT_INSIGHTS_ORIGIN = "https://insights.bulkloads.com";
 
 const configuredOrigin = process.env.NEXT_PUBLIC_INSIGHTS_URL?.trim();
 
-const INSIGHTS_ORIGIN = (
+/**
+ * Exported because it is also where the plan prices come from:
+ * `lib/insights-plans.ts` fetches `/api/public/plans` off this same origin at
+ * build time. One origin for the handoff and the catalog, so a preview build
+ * pointed at a preview of Insights gets that deployment's prices too.
+ */
+export const INSIGHTS_ORIGIN = (
   configuredOrigin || DEFAULT_INSIGHTS_ORIGIN
 ).replace(/\/+$/, "");
 
@@ -93,8 +99,16 @@ export const SIGN_UP_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-up`;
 /**
  * How Insights prices an organization. Singular, unlike the page slugs:
  * `/carriers` sells to a `carrier`.
+ *
+ * The runtime tuple is the declaration and the type is derived from it, so a
+ * fourth type is added in one place. They used to be separate — the union here,
+ * and a hardcoded list inside the plan fetcher — which meant a type added to
+ * this file would compile everywhere and simply never be read off the wire,
+ * leaving that persona's prices on the static mirror with nothing saying why.
  */
-export type OrgType = "carrier" | "broker" | "shipper";
+export const ORG_TYPES = ["carrier", "broker", "shipper"] as const;
+
+export type OrgType = (typeof ORG_TYPES)[number];
 
 /** What the visitor already told us by being on the page they are on. */
 export type AuthIntent = {
