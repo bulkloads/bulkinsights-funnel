@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import HeroMedia from "@/components/portal/HeroMedia";
+import PricingSection from "@/components/portal/PricingSection";
 import {
   ClosingCta,
   CtaPair,
@@ -27,7 +28,7 @@ export default function IcpPage({ icp }: { icp: Icp }) {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <SiteHeader />
+      <SiteHeader orgType={icp.orgType} />
 
       <main id="main">
         {/* ── HERO ────────────────────────────────────────────
@@ -57,7 +58,7 @@ export default function IcpPage({ icp }: { icp: Icp }) {
               </p>
 
               <div className="mt-9">
-                <CtaPair onDark />
+                <CtaPair onDark orgType={icp.orgType} />
               </div>
             </div>
           </div>
@@ -184,7 +185,7 @@ export default function IcpPage({ icp }: { icp: Icp }) {
                   ))}
                 </ul>
                 <div className="mt-8">
-                  <SignInButton />
+                  <SignInButton orgType={icp.orgType} />
                 </div>
               </div>
               <div className="min-w-0 lg:col-span-7">
@@ -193,6 +194,11 @@ export default function IcpPage({ icp }: { icp: Icp }) {
             </div>
           </div>
         </section>
+
+        {/* ── PRICING ────────────────────────────────────────
+            Per org type, because a plan costs a carrier, a broker
+            and a shipper three different amounts. */}
+        <PricingSection orgType={icp.orgType} />
 
         {/* ── CROSS-LINKS ────────────────────────────────────── */}
         <section className="py-16" style={{ background: brand.offWhite }}>
@@ -224,10 +230,10 @@ export default function IcpPage({ icp }: { icp: Icp }) {
           </div>
         </section>
 
-        <ClosingCta title={icp.ctaTitle} body={icp.ctaBody} />
+        <ClosingCta title={icp.ctaTitle} body={icp.ctaBody} orgType={icp.orgType} />
       </main>
 
-      <SiteFooter />
+      <SiteFooter orgType={icp.orgType} />
     </div>
   );
 }

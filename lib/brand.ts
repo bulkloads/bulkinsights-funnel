@@ -89,3 +89,70 @@ const INSIGHTS_ORIGIN = (
 
 export const SIGN_IN_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-in`;
 export const SIGN_UP_URL = `${INSIGHTS_ORIGIN}/api/auth/sign-up`;
+
+/**
+ * How Insights prices an organization. Singular, unlike the page slugs:
+ * `/carriers` sells to a `carrier`.
+ */
+export type OrgType = "carrier" | "broker" | "shipper";
+
+/** What the visitor already told us by being on the page they are on. */
+export type AuthIntent = {
+  orgType?: OrgType;
+  /** A self-serve package key, set when a specific plan card was clicked. */
+  plan?: string;
+  seats?: number;
+  /** utm_* and click ids lifted off this page's own query string. */
+  attribution?: Readonly<Record<string, string>>;
+};
+
+const UPGRADE_PATH = "/upgrade";
+
+/**
+ * The handoff on the Insights side forwards exactly one thing: `next`. It is
+ * allow-listed by pathname and its query string is carried through intact, so
+ * that value is the only channel anything here has into the app. Anything hung
+ * off the auth URL itself is read for `next` and then dropped.
+ *
+ * Null when there is no intent to carry. An unknown ICP must not manufacture a
+ * `next`, because the destination it would override is the one the handoff
+ * picks on its own: org creation for a new account, the app for a returning
+ * one.
+ */
+function upgradeNext(intent: AuthIntent): string | null {
+  const params = new URLSearchParams();
+  if (intent.plan) params.set("package", intent.plan);
+  if (intent.seats) params.set("seats", String(intent.seats));
+  if (intent.orgType) params.set("org_type", intent.orgType);
+  if ([...params].length === 0) return null;
+
+  // Attribution rides along only once there is a destination to ride to. On
+  // its own it is not a reason to redirect anyone.
+  for (const [key, value] of Object.entries(intent.attribution ?? {})) {
+    params.set(key, value);
+  }
+  return `${UPGRADE_PATH}?${params}`;
+}
+
+/**
+ * An account entry point carrying whatever the funnel knows about the visitor.
+ *
+ * Attribution is written twice on purpose: inside `next`, which is what
+ * actually survives into the app, and on the auth URL itself, which today's
+ * handoff ignores but which is where a campaign parameter belongs and costs
+ * nothing to have in place already.
+ */
+export function authUrl(
+  action: "sign-in" | "sign-up",
+  intent: AuthIntent = {},
+): string {
+  const base = action === "sign-in" ? SIGN_IN_URL : SIGN_UP_URL;
+  const params = new URLSearchParams();
+  const next = upgradeNext(intent);
+  if (next) params.set("next", next);
+  for (const [key, value] of Object.entries(intent.attribution ?? {})) {
+    params.set(key, value);
+  }
+  const query = params.toString();
+  return query ? `${base}?${query}` : base;
+}

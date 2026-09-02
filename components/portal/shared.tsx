@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
+import AccountLink from "@/components/portal/AccountLink";
 import BookingModal from "@/components/BookingModal";
 import Photo from "@/components/portal/Photo";
-import { SIGN_IN_URL, SIGN_UP_URL, brand } from "@/lib/brand";
+import { brand, type OrgType } from "@/lib/brand";
 
 /* ──────────────────────────────────────────────────────────────
    Buttons
@@ -17,10 +18,18 @@ const sizing = {
 
 type Size = keyof typeof sizing;
 
-export function SignInButton({ size = "md" }: { size?: Size }) {
+/**
+ * The org type this control should hand to Insights, where the page it sits on
+ * establishes one. Undefined on the home page, which knows nothing about the
+ * visitor yet and must not guess — a wrong org type prices them wrongly.
+ */
+type Intent = { orgType?: OrgType };
+
+export function SignInButton({ size = "md", orgType }: { size?: Size } & Intent) {
   return (
-    <Link
-      href={SIGN_IN_URL}
+    <AccountLink
+      action="sign-in"
+      orgType={orgType}
       className={`group inline-flex items-center justify-center gap-2 font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]}`}
       style={{
         background: brand.orange,
@@ -33,20 +42,22 @@ export function SignInButton({ size = "md" }: { size?: Size }) {
         className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
         strokeWidth={2.5}
       />
-    </Link>
+    </AccountLink>
   );
 }
 
 export function SignUpButton({
   size = "md",
   onDark = false,
+  orgType,
 }: {
   size?: Size;
   onDark?: boolean;
-}) {
+} & Intent) {
   return (
-    <Link
-      href={SIGN_UP_URL}
+    <AccountLink
+      action="sign-up"
+      orgType={orgType}
       className={`inline-flex items-center justify-center border font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]} ${
         onDark ? "text-white hover:bg-white/10" : "hover:bg-black/[0.04]"
       }`}
@@ -57,7 +68,7 @@ export function SignUpButton({
       }}
     >
       Sign up
-    </Link>
+    </AccountLink>
   );
 }
 
@@ -70,11 +81,12 @@ export function CtaPair({
   size = "lg",
   onDark = false,
   align = "left",
+  orgType,
 }: {
   size?: Size;
   onDark?: boolean;
   align?: "left" | "center";
-}) {
+} & Intent) {
   return (
     <div className={align === "center" ? "flex flex-col items-center" : ""}>
       <div
@@ -82,8 +94,8 @@ export function CtaPair({
           align === "center" ? "justify-center" : ""
         }`}
       >
-        <SignInButton size={size} />
-        <SignUpButton size={size} onDark={onDark} />
+        <SignInButton size={size} orgType={orgType} />
+        <SignUpButton size={size} onDark={onDark} orgType={orgType} />
       </div>
       <p
         className={`mt-4 text-[13px] ${align === "center" ? "text-center" : ""}`}
@@ -127,7 +139,7 @@ const navLinks = [
   { href: "/shippers", label: "Shippers" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ orgType }: Intent = {}) {
   return (
     <>
       {/* Utility bar */}
@@ -135,13 +147,14 @@ export function SiteHeader() {
         <div className="shell flex h-10 items-center justify-between gap-4">
           <p className="truncate text-[12.5px]" style={{ color: brand.textOnDark }}>
             Bulk Insights opens with your BulkLoads account.{" "}
-            <Link
-              href={SIGN_UP_URL}
+            <AccountLink
+              action="sign-up"
+              orgType={orgType}
               className="font-medium underline-offset-2 hover:underline"
               style={{ color: brand.orange }}
             >
               Create one
-            </Link>
+            </AccountLink>
           </p>
           <a
             href="tel:18005189240"
@@ -191,15 +204,17 @@ export function SiteHeader() {
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              href={SIGN_IN_URL}
+            <AccountLink
+              action="sign-in"
+              orgType={orgType}
               className="hidden text-[14px] font-medium tracking-[-0.01em] transition-colors duration-200 hover:text-black sm:block"
               style={{ color: brand.textBody }}
             >
               Sign in
-            </Link>
-            <Link
-              href={SIGN_UP_URL}
+            </AccountLink>
+            <AccountLink
+              action="sign-up"
+              orgType={orgType}
               className="inline-flex items-center justify-center px-4 py-2.5 text-[14px] font-medium tracking-[-0.01em] transition-colors duration-200"
               style={{
                 background: brand.orange,
@@ -208,7 +223,7 @@ export function SiteHeader() {
               }}
             >
               Sign up
-            </Link>
+            </AccountLink>
           </div>
         </div>
       </header>
@@ -216,7 +231,7 @@ export function SiteHeader() {
   );
 }
 
-export function SiteFooter() {
+export function SiteFooter({ orgType }: Intent = {}) {
   return (
     <footer style={{ background: brand.ink }}>
       <div className="shell py-14">
@@ -270,22 +285,24 @@ export function SiteFooter() {
               </div>
               <ul className="mt-4 space-y-2.5">
                 <li>
-                  <Link
-                    href={SIGN_IN_URL}
+                  <AccountLink
+                    action="sign-in"
+                    orgType={orgType}
                     className="text-sm transition-colors duration-200 hover:text-white"
                     style={{ color: brand.textOnDark }}
                   >
                     Sign in
-                  </Link>
+                  </AccountLink>
                 </li>
                 <li>
-                  <Link
-                    href={SIGN_UP_URL}
+                  <AccountLink
+                    action="sign-up"
+                    orgType={orgType}
                     className="text-sm transition-colors duration-200 hover:text-white"
                     style={{ color: brand.textOnDark }}
                   >
                     Sign up
-                  </Link>
+                  </AccountLink>
                 </li>
                 <li>
                   <a
@@ -315,10 +332,11 @@ export function SiteFooter() {
 export function ClosingCta({
   title = "Price it with confidence.",
   body = "Tighter margins, rising costs, and a market that won't sit still. Put 14 years of settled bulk freight behind your next quote.",
+  orgType,
 }: {
   title?: string;
   body?: string;
-}) {
+} & Intent) {
   return (
     <section className="relative isolate overflow-hidden" style={{ background: brand.ink }}>
       <div className="absolute inset-0 -z-10 opacity-45">
@@ -340,7 +358,7 @@ export function ClosingCta({
             {body}
           </p>
           <div className="mt-9">
-            <CtaPair onDark />
+            <CtaPair onDark orgType={orgType} />
           </div>
           <p className="mt-6 text-sm" style={{ color: brand.textOnDarkMuted }}>
             Prefer a walkthrough first?{" "}

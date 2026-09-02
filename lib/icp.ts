@@ -12,11 +12,18 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import type { OrgType } from "@/lib/brand";
 
 export type IcpSlug = "carriers" | "brokers" | "shippers";
 
 export type Icp = {
   slug: IcpSlug;
+  /**
+   * How Insights prices this audience. Singular where the slug is plural, and
+   * stated rather than derived by trimming an "s" — this value decides what a
+   * visitor is quoted and which plans they are shown.
+   */
+  orgType: OrgType;
   nav: string;
   eyebrow: string;
   /** Page <title>. */
@@ -51,6 +58,7 @@ export type Icp = {
 export const icps: Record<IcpSlug, Icp> = {
   carriers: {
     slug: "carriers",
+    orgType: "carrier",
     nav: "Carriers",
     eyebrow: "For carriers & owner operators",
     metaTitle: "Bulk Insights for Carriers | Get paid what you're worth",
@@ -119,6 +127,7 @@ export const icps: Record<IcpSlug, Icp> = {
 
   brokers: {
     slug: "brokers",
+    orgType: "broker",
     nav: "Brokers",
     eyebrow: "For brokers",
     metaTitle: "Bulk Insights for Brokers | Quote fast, defend every number",
@@ -192,6 +201,7 @@ export const icps: Record<IcpSlug, Icp> = {
 
   shippers: {
     slug: "shippers",
+    orgType: "shipper",
     nav: "Shippers",
     eyebrow: "For shippers",
     metaTitle: "Bulk Insights for Shippers | Know what your freight should cost",
