@@ -12,8 +12,13 @@ import { brand, type OrgType } from "@/lib/brand";
 
 const sizing = {
   sm: "px-4 py-2 text-[14px]",
-  md: "px-4 py-2.5 text-[14px]",
+  /** Header controls. A step up from the old sm so the pair reads as the
+      primary action on the page rather than as nav furniture. */
+  md: "px-5 py-2.5 text-[15px]",
   lg: "px-5 py-[12.8px] text-[15.2px]",
+  /** Hero. The one control on the page that should look like the thing to
+      press, so it is deliberately larger than anything around it. */
+  xl: "px-8 py-4 text-[17px]",
 } as const;
 
 type Size = keyof typeof sizing;
@@ -49,11 +54,39 @@ export function SignInButton({ size = "md", orgType }: { size?: Size } & Intent)
 export function SignUpButton({
   size = "md",
   onDark = false,
+  filled = false,
   orgType,
 }: {
   size?: Size;
   onDark?: boolean;
+  /**
+   * Orange fill instead of the outline. For the one place sign-up is the
+   * only control on the screen: an outline button reads as secondary, and
+   * a lone secondary CTA leaves the page without a primary action.
+   */
+  filled?: boolean;
 } & Intent) {
+  if (filled) {
+    return (
+      <AccountLink
+        action="sign-up"
+        orgType={orgType}
+        className={`group inline-flex items-center justify-center gap-2 font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]}`}
+        style={{
+          background: brand.orange,
+          color: brand.ink,
+          borderRadius: brand.radiusButton,
+        }}
+      >
+        Sign up
+        <ArrowRight
+          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+          strokeWidth={2.5}
+        />
+      </AccountLink>
+    );
+  }
+
   return (
     <AccountLink
       action="sign-up"
@@ -137,6 +170,7 @@ const navLinks = [
   { href: "/carriers", label: "Carriers" },
   { href: "/brokers", label: "Brokers" },
   { href: "/shippers", label: "Shippers" },
+  { href: "/pricing", label: "Pricing" },
 ];
 
 export function SiteHeader({ orgType }: Intent = {}) {
@@ -205,24 +239,24 @@ export function SiteHeader({ orgType }: Intent = {}) {
 
           <div className="ml-auto flex items-center gap-3">
             <AccountLink
-              action="sign-in"
-              orgType={orgType}
-              className="hidden text-[14px] font-medium tracking-[-0.01em] transition-colors duration-200 hover:text-black sm:block"
-              style={{ color: brand.textBody }}
-            >
-              Sign in
-            </AccountLink>
-            <AccountLink
               action="sign-up"
               orgType={orgType}
-              className="inline-flex items-center justify-center px-4 py-2.5 text-[14px] font-medium tracking-[-0.01em] transition-colors duration-200"
+              className="hidden px-2 text-[15px] font-medium tracking-[-0.01em] transition-colors duration-200 hover:text-black sm:block"
+              style={{ color: brand.textBody }}
+            >
+              Sign up
+            </AccountLink>
+            <AccountLink
+              action="sign-in"
+              orgType={orgType}
+              className="inline-flex items-center justify-center px-5 py-2.5 text-[15px] font-medium tracking-[-0.01em] transition-colors duration-200"
               style={{
                 background: brand.orange,
                 color: brand.ink,
                 borderRadius: brand.radiusButton,
               }}
             >
-              Sign up
+              Sign in
             </AccountLink>
           </div>
         </div>

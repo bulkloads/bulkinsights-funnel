@@ -30,23 +30,48 @@ import {
  * the await happens during prerender and the rendered markup is the same
  * either way.
  */
-export default async function PricingSection({ orgType }: { orgType: OrgType }) {
+export default async function PricingSection({
+  orgType,
+  eyebrow = "Pricing",
+  heading = "Priced for how you use it",
+  intro = "Per user, per month. Add people as you need them, and a larger team moves every seat onto a lower rate.",
+  background = brand.band,
+  footnote = true,
+}: {
+  orgType: OrgType;
+  /** Null drops the label, for a page that already has its own header. */
+  eyebrow?: string | null;
+  heading?: string;
+  intro?: string | null;
+  background?: string;
+  /**
+   * The seat ceiling and phone number below the grid. True on a page that
+   * shows one org type; on `/pricing`, which stacks all three, it is left
+   * to the last block so the line is not repeated three times.
+   */
+  footnote?: boolean;
+}) {
   const { plans: catalog, maxSeats } = await loadPlans();
   const plans = plansFor(orgType, catalog);
   const shown = plans.map((p) => p.key);
 
   return (
-    <section className="py-24 lg:py-28" style={{ background: brand.band }}>
+    <section className="py-24 lg:py-28" style={{ background }}>
       <div className="shell">
         <div className="max-w-2xl">
-          <Eyebrow>Pricing</Eyebrow>
-          <h2 className="t-h2 mt-6 text-[2.25rem] sm:text-[2.75rem] lg:text-[3.2rem]">
-            Priced for how you use it
+          {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
+          <h2
+            className={`t-h2 text-[2.25rem] sm:text-[2.75rem] lg:text-[3.2rem] ${
+              eyebrow ? "mt-6" : ""
+            }`}
+          >
+            {heading}
           </h2>
-          <p className="t-lead mt-5" style={{ color: brand.textBody }}>
-            Per user, per month. Add people as you need them, and a larger team
-            moves every seat onto a lower rate.
-          </p>
+          {intro ? (
+            <p className="t-lead mt-5" style={{ color: brand.textBody }}>
+              {intro}
+            </p>
+          ) : null}
         </div>
 
         <div
@@ -65,6 +90,7 @@ export default async function PricingSection({ orgType }: { orgType: OrgType }) 
           ))}
         </div>
 
+        {footnote ? (
         <p className="mt-8 text-[13px]" style={{ color: brand.textMuted }}>
           Prices in USD, billed monthly. Self-serve covers up to{" "}
           {maxSeats} users; for a larger team call{" "}
@@ -73,6 +99,7 @@ export default async function PricingSection({ orgType }: { orgType: OrgType }) 
           </a>{" "}
           and we will put together a plan that fits.
         </p>
+        ) : null}
       </div>
     </section>
   );
