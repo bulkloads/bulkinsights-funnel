@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Photo from "@/components/portal/Photo";
+import AccountLink from "@/components/portal/AccountLink";
 import HeroMedia from "@/components/portal/HeroMedia";
 import MarketTicker from "@/components/portal/MarketTicker";
 import {
   ClosingCta,
-  CtaPair,
+  SignUpButton,
   Eyebrow,
   SignInButton,
   SiteFooter,
@@ -108,7 +109,19 @@ export default function PortalPage() {
                 </p>
 
                 <div className="mt-9">
-                  <CtaPair onDark />
+                  <div className="flex flex-col items-start gap-4">
+                    <SignUpButton size="xl" filled />
+                    <p className="text-[14px]" style={{ color: brand.textOnDarkMuted }}>
+                      Already a BulkLoads member?{" "}
+                      <AccountLink
+                        action="sign-in"
+                        className="font-medium underline underline-offset-2"
+                        style={{ color: brand.orange }}
+                      >
+                        Sign in
+                      </AccountLink>
+                    </p>
+                  </div>
                 </div>
               </div>
 
