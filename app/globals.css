@@ -49,3 +49,218 @@ body {
   background-image: radial-gradient(rgba(244, 125, 1, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Bulk Insights design system
+
+   Source of truth: the BulkLoads v2 public site, which FlatLoads also
+   matches. Display type is uppercase at weight 600 with tight negative
+   tracking (-0.02em) and line-height at or near 1.0. Neutrals are WARM
+   (#fbfbf9 / #131312 / #e1e1da), which is the family signature and the
+   easiest thing to lose by substituting a generic grey. Container is
+   1248px with 32px gutters; sections breathe at 112px.
+   ══════════════════════════════════════════════════════════════ */
+
+body:has(.portal-scope) {
+  background: #fbfbf9;
+  color: #131312;
+}
+
+body:has(.portal-scope) ::selection {
+  background: #f37e21;
+  color: #131312;
+}
+
+.portal-scope {
+  --ink: #131312;
+  --off-white: #fbfbf9;
+  --band: #f6f6f2;
+  --rule: #e1e1da;
+  --rule-dark: rgba(255, 255, 255, 0.14);
+  --text: #131312;
+  --body: #36362f;
+  --muted: #6b6b61;
+  --on-dark: #d2d2c8;
+  --orange: #f37e21;
+  --green: #95c93f;
+}
+
+/* ── Display type ───────────────────────────────────────────── */
+
+.t-display {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+
+/* Section heads run large on this system: 57.6px at desktop. */
+.t-h2 {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.t-h3 {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.33;
+}
+
+/* Sub-heads inside cards and lists stay sentence case. */
+.t-h4 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.5;
+}
+
+.t-lead {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+}
+
+.t-body {
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.t-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ── Data ───────────────────────────────────────────────────── */
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.t-index {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+
+.shell {
+  max-width: 1248px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+@media (min-width: 768px) {
+  .shell { padding-left: 32px; padding-right: 32px; }
+}
+
+/* ── Interaction ────────────────────────────────────────────── */
+
+.portal-scope :focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.portal-scope a,
+.portal-scope button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-scope *,
+  .portal-scope *::before,
+  .portal-scope *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.625rem 1rem;
+  background: var(--orange);
+  color: #131312;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* The hero product panel runs out toward the right edge of the viewport
+   rather than stopping at the container. Pinned to the viewport so it
+   lands the same way at every width and never clips its own content. */
+@media (min-width: 1024px) {
+  .bleed-right {
+    margin-right: calc(-1 * max(0px, (100vw - 1248px) / 2 - 16px));
+  }
+}
+
+/* ── Market ticker ───────────────────────────────────────────────
+   The rail holds the row list twice and slides by exactly half its
+   width, so the wrap is invisible and the loop never resets visibly.
+
+   The duration is FIXED, so scroll speed is proportional to how many
+   rows there are: one full pass takes 48s whether the rail is short or
+   long. That is fine for a stable row set and worth re-timing if the
+   count changes much — the rows now come from the Insights feed, which
+   drops labels it cannot measure, so the width is not fully ours to
+   pick. (An earlier version of this comment claimed the duration scaled
+   with content length. It never did.) */
+
+.ticker-rail {
+  animation: ticker-scroll 48s linear infinite;
+  will-change: transform;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+
+.ticker-viewport:hover .ticker-rail {
+  animation-play-state: paused;
+}
+
+/* Fade the strip into the edges so rows enter and leave rather than
+   being clipped mid-glyph. */
+.ticker-viewport {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 48px, #000 calc(100% - 48px), transparent);
+}
+
+/* Motion is the whole point of a ticker, so reduced motion does not get
+   a slower version: it gets a static, manually scrollable strip with the
+   duplicate track removed from layout. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker-rail {
+    animation: none;
+    transform: none;
+  }
+  .ticker-viewport {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .ticker-rail > [aria-hidden="true"] {
+    display: none;
+  }
+}

@@ -4,10 +4,29 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
+import { brand } from "@/lib/brand";
 
-type Variant = "default" | "header" | "hero";
+type Variant = "default" | "header" | "hero" | "portalLink";
 
-export default function BookingModal({ variant = "default" }: { variant?: Variant }) {
+export default function BookingModal({
+  variant = "default",
+  accent = brand.orange,
+  label,
+}: {
+  variant?: Variant;
+  /**
+   * Modal chrome colour. Defaults to THE BulkLoads orange — see lib/brand,
+   * which keeps exactly one.
+   *
+   * Typed as a hex literal because it is concatenated with an alpha suffix
+   * below. `rgb(...)`, `hsl(...)` or a CSS variable would produce an
+   * invalid declaration that the browser drops silently, taking the
+   * modal's border with it.
+   */
+  accent?: `#${string}`;
+  /** Overrides the trigger copy. */
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -27,7 +46,15 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
   }, [open]);
 
   const trigger =
-    variant === "header" ? (
+    variant === "portalLink" ? (
+      <button
+        onClick={() => setOpen(true)}
+        className="font-semibold underline underline-offset-2 transition-colors"
+        style={{ color: accent }}
+      >
+        {label ?? "Book a demo"}
+      </button>
+    ) : variant === "header" ? (
       <button
         onClick={() => setOpen(true)}
         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:-translate-y-px"
@@ -75,11 +102,11 @@ export default function BookingModal({ variant = "default" }: { variant?: Varian
           />
 
           <div className="relative w-full max-w-4xl max-h-[92vh] rounded-2xl overflow-hidden shadow-2xl bg-white flex flex-col"
-            style={{ border: "1px solid rgba(244,125,1,0.2)" }}>
+            style={{ border: `1px solid ${accent}33` }}>
             <div className="flex items-center gap-3 px-5 py-4 border-b flex-shrink-0"
               style={{ background: "#0c1d2b", borderColor: "rgba(255,255,255,0.1)" }}>
               <div className="h-9 w-9 rounded-lg flex items-center justify-center"
-                style={{ background: "#f47d01" }}>
+                style={{ background: accent }}>
                 <Calendar className="h-4 w-4" strokeWidth={2.5} style={{ color: "#0c1d2b" }} />
               </div>
               <div className="font-bold text-white text-base leading-tight">Book Your Demo</div>
