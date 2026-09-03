@@ -239,15 +239,15 @@ export function SiteHeader({ orgType }: Intent = {}) {
 
           <div className="ml-auto flex items-center gap-3">
             <AccountLink
-              action="sign-up"
+              action="sign-in"
               orgType={orgType}
               className="hidden px-2 text-[15px] font-medium tracking-[-0.01em] transition-colors duration-200 hover:text-black sm:block"
               style={{ color: brand.textBody }}
             >
-              Sign up
+              Sign in
             </AccountLink>
             <AccountLink
-              action="sign-in"
+              action="sign-up"
               orgType={orgType}
               className="inline-flex items-center justify-center px-5 py-2.5 text-[15px] font-medium tracking-[-0.01em] transition-colors duration-200"
               style={{
@@ -256,7 +256,7 @@ export function SiteHeader({ orgType }: Intent = {}) {
                 borderRadius: brand.radiusButton,
               }}
             >
-              Sign in
+              Sign up
             </AccountLink>
           </div>
         </div>
