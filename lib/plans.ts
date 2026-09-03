@@ -231,20 +231,31 @@ export function entryRate(tiers: ReadonlyArray<PlanTier>): number | null {
 
 /**
  * Where the per-seat rate first drops, and by how much. Null when there is
- * nothing to advertise: a flat price, or a second band that is not cheaper.
+ * nothing to advertise: a flat price, a second band that is not cheaper, or a
+ * break that opens above `maxSeats` and so no self-serve buyer can reach.
+ *
+ * `maxSeats` is the plan's self-serve cap: the break repricing starts at
+ * `opening.upTo + 1`, and advertising a discount that first applies past the
+ * most seats this plan sells here would promise a rate nobody buying on the
+ * page can get (they would have to contact sales for that seat count).
  *
  * Reads the first two bands in order, so it carries the same ordering
  * precondition as {@link entryRate}.
  */
-export function volumeBreak(tiers: ReadonlyArray<PlanTier>): {
+export function volumeBreak(
+  tiers: ReadonlyArray<PlanTier>,
+  maxSeats: number,
+): {
   fromSeats: number;
   savingPerSeatCents: number;
 } | null {
   const [opening, next] = tiers;
   if (!opening || !next || opening.upTo === "inf") return null;
   if (next.unitAmount >= opening.unitAmount) return null;
+  const fromSeats = opening.upTo + 1;
+  if (fromSeats > maxSeats) return null;
   return {
-    fromSeats: opening.upTo + 1,
+    fromSeats,
     savingPerSeatCents: opening.unitAmount - next.unitAmount,
   };
 }

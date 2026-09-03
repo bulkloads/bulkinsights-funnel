@@ -95,7 +95,7 @@ function PlanCard({
   if (!tiers) return null;
 
   const rate = entryRate(tiers);
-  const discount = volumeBreak(tiers);
+  const discount = volumeBreak(tiers, plan.maxSeats);
   const { leadIn, features } = highlightsFor(plan, shown, catalog);
 
   return (
