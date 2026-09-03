@@ -1,22 +1,10 @@
 /**
- * ⚠ HERO VIDEO IS OFF UNTIL THE WEB EXPORTS LAND. Every `video` below is
- * `null`, so the heroes render their posters and nothing else.
- *
- * It is off because the files do not exist. The original cuts (31-37 MB
- * each, 138 MB total, each still carrying an unused AAC audio track) were
- * never committed and are not in /public/media, so pointing at them made
- * every desktop hero mount a <video> whose src 404s. That failed quietly
- * — the poster keeps showing — which is exactly why it would have shipped.
- *
- * To turn it back on: drop the ~5 MB no-audio web exports into
- * /public/media as hero-{home,carriers,brokers,shippers}.mp4, set `video`
- * on each slot below, and replace the posters with the frame-1 stills that
- * come with them. Do not set `video` before the file is committed.
- *
- * hero-home.jpg is a true frame-0 capture, so that one starts cleanly.
- * The other three were pulled with the macOS thumbnailer, which grabs a
- * representative frame rather than frame 1, so those will start with a
- * visible jump until the real posters land.
+ * Hero videos are live. Each hero slot points at a muted, ~1-2 MB web loop in
+ * /public/media (hero-{home,carriers,brokers,shippers}.mp4, transcoded from the
+ * source cuts and stripped of their unused audio track). HeroMedia plays each a
+ * few times on a wide desktop, then settles back onto the poster still; narrow
+ * screens and reduced-motion visitors get the still only. The posters below are
+ * the frames those loops land on, so they must read well on their own.
  */
 
 /**
@@ -55,7 +43,7 @@ export type MediaSlot = {
 export const media = {
   /* ── Hero slots (video) ─────────────────────────────────────── */
   homeHero: {
-    video: null,
+    video: "/media/hero-home.mp4",
     poster: "/media/hero-home.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -66,7 +54,7 @@ export const media = {
     focal: "50% 45%",
   },
   carriersHero: {
-    video: null,
+    video: "/media/hero-carriers.mp4",
     poster: "/media/hero-carriers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -77,7 +65,7 @@ export const media = {
     focal: "50% 45%",
   },
   brokersHero: {
-    video: null,
+    video: "/media/hero-brokers.mp4",
     poster: "/media/hero-brokers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -88,7 +76,7 @@ export const media = {
     focal: "50% 40%",
   },
   shippersHero: {
-    video: null,
+    video: "/media/hero-shippers.mp4",
     poster: "/media/hero-shippers.jpg",
     photo: null,
     /* Decorative background behind the headline, so the alt stays empty:
@@ -135,7 +123,3 @@ export const media = {
 } satisfies Record<string, MediaSlot>;
 
 export type MediaKey = keyof typeof media;
-
-/** Back-compat alias: existing still slots are read through this. */
-export const photos = media;
-export type PhotoKey = MediaKey;

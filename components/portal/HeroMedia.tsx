@@ -1,25 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { MediaPlaceholder } from "@/components/portal/Photo";
 import { media, type MediaKey } from "@/lib/media";
 
+/** How many times the hero loop plays before it settles on the still. */
+const HERO_LOOP_PLAYS = 3;
+
 /**
  * Background media for a hero.
  *
- * Renders the poster first and only upgrades to video once the client
- * confirms it is wanted. Two guards, both deliberate:
+ * The still is always the base layer: it is the server-rendered output, the
+ * LCP image, and what anyone without JS (or with reduced motion, or on a
+ * narrow screen) keeps. On a wide desktop that wants motion, the video loop
+ * fades in over it, plays a few times, then fades back out to leave the still
+ * on screen. So the page ends where it started, deliberately, rather than
+ * looping forever.
  *
- *  - prefers-reduced-motion: an autoplaying loop is exactly the kind of
- *    ambient motion that setting exists to suppress. CSS alone cannot
- *    stop playback, so the decision has to happen before the <video>
- *    element is rendered.
- *  - narrow viewports: a 5 MB ambient loop is not worth it on cell data,
- *    so under 768px the poster is the hero.
- *
- * Because the upgrade happens after mount, the server-rendered output is
- * always the still. That is also what anyone without JS keeps.
+ * Two guards decide whether the video is wanted at all, both before the
+ * <video> is rendered because CSS cannot stop playback:
+ *  - prefers-reduced-motion: an autoplaying loop is exactly the ambient motion
+ *    that setting exists to suppress.
+ *  - narrow viewports: not worth the bytes on cell data, so under 768px the
+ *    poster is the whole hero.
  */
 export default function HeroMedia({
   slot,
@@ -36,6 +40,10 @@ export default function HeroMedia({
 }) {
   const item = media[slot];
   const [useVideo, setUseVideo] = useState(false);
+  // The video is faded in only while it is actually playing, so the still
+  // shows through during load and again once the loops are done.
+  const [videoShown, setVideoShown] = useState(false);
+  const playsRef = useRef(0);
 
   useEffect(() => {
     if (!item.video) return;
@@ -53,35 +61,25 @@ export default function HeroMedia({
     };
   }, [item.video]);
 
+  // Start each playthrough clean whenever the video (re)enters: a resize back
+  // to wide, a reduced-motion toggle, or a slot change must reset the loop
+  // count and re-hide the video, or it would inherit a finished count and
+  // flash once instead of playing its loops.
+  useEffect(() => {
+    if (!useVideo) return;
+    playsRef.current = 0;
+    setVideoShown(false);
+  }, [useVideo, item.video]);
+
   const overlay = scrim ? (
     <div className="absolute inset-0" style={{ background: scrim }} />
   ) : null;
 
-  if (item.video && useVideo) {
-    return (
-      <div className="absolute inset-0">
-        <video
-          className={`h-full w-full object-cover ${className}`}
-          style={{ objectPosition: item.focal }}
-          src={item.video}
-          poster={item.poster ?? undefined}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-          tabIndex={-1}
-        />
-        {overlay}
-      </div>
-    );
-  }
-
   const still = item.poster ?? item.photo;
-  if (still) {
-    return (
-      <div className="absolute inset-0">
+
+  return (
+    <div className="absolute inset-0">
+      {still ? (
         <Image
           src={still}
           alt={item.alt}
@@ -91,16 +89,39 @@ export default function HeroMedia({
           className={`object-cover ${className}`}
           style={{ objectPosition: item.focal }}
         />
-        {overlay}
-      </div>
-    );
-  }
+      ) : (
+        <MediaPlaceholder brief={item.brief} tone="dark" kind="Hero video" className={className} />
+      )}
 
-  // Same `absolute inset-0` wrapper as both filled branches above, so an
-  // empty slot occupies the hero background rather than joining the flow.
-  return (
-    <div className="absolute inset-0">
-      <MediaPlaceholder brief={item.brief} tone="dark" kind="Hero video" className={className} />
+      {item.video && useVideo ? (
+        <video
+          key={item.video}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+            videoShown ? "opacity-100" : "opacity-0"
+          } ${className}`}
+          style={{ objectPosition: item.focal }}
+          src={item.video}
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+          tabIndex={-1}
+          onPlaying={() => setVideoShown(true)}
+          onError={() => setVideoShown(false)}
+          onEnded={(e) => {
+            playsRef.current += 1;
+            if (playsRef.current < HERO_LOOP_PLAYS) {
+              void e.currentTarget.play().catch(() => setVideoShown(false));
+            } else {
+              // Fade back to the still, which has been underneath all along.
+              setVideoShown(false);
+            }
+          }}
+        />
+      ) : null}
+
+      {overlay}
     </div>
   );
 }

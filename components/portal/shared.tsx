@@ -315,6 +315,32 @@ export function SiteFooter({ orgType }: Intent = {}) {
                 </li>
               </ul>
             </nav>
+
+            <nav aria-label="Legal">
+              <div className="t-eyebrow" style={{ color: brand.textOnDarkMuted }}>
+                Legal
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                <li>
+                  <Link
+                    href="/terms"
+                    className="text-sm transition-colors duration-200 hover:text-white"
+                    style={{ color: brand.textOnDark }}
+                  >
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://www.bulkloads.com/sign_up/privacy_policy/"
+                    className="text-sm transition-colors duration-200 hover:text-white"
+                    style={{ color: brand.textOnDark }}
+                  >
+                    Privacy Policy
+                  </a>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
 
