@@ -32,6 +32,49 @@ function useAttribution(): Record<string, string> {
 }
 
 /**
+ * The funnel's GA4 client_id, read off the `_ga` cookie once GA has written it.
+ *
+ * Shared at module scope like the attribution above and resolved once per page.
+ * Empty until GA's async script sets the cookie — a short poll covers that gap —
+ * so the href gains `ga_cid` well before anyone can click. Stays undefined when
+ * GA is off (no NEXT_PUBLIC_GA_ID, so no cookie), and nothing is forwarded.
+ */
+let gaClientIdPromise: Promise<string | undefined> | null = null;
+
+function resolveGaClientId(): Promise<string | undefined> {
+  gaClientIdPromise ??= new Promise((resolve) => {
+    if (!process.env.NEXT_PUBLIC_GA_ID) return resolve(undefined);
+    let tries = 0;
+    const read = () => {
+      // `_ga` is `GA1.<n>.<client_id>`, GA's client_id being the trailing
+      // `<int>.<int>`; matching that shape also validates it before it rides a URL.
+      const m = document.cookie.match(/(?:^|;\s*)_ga=GA\d+\.\d+\.(\d+\.\d+)/);
+      if (m) return resolve(m[1]);
+      if (++tries > 15) return resolve(undefined); // ~3s; GA never wrote a cookie
+      setTimeout(read, 200);
+    };
+    read();
+  });
+  return gaClientIdPromise;
+}
+
+function useGaClientId(): string | undefined {
+  const [clientId, setClientId] = useState<string>();
+
+  useEffect(() => {
+    let active = true;
+    resolveGaClientId().then((id) => {
+      if (active && id) setClientId(id);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return clientId;
+}
+
+/**
  * A link to sign-in or sign-up carrying the visitor's intent: the org type the
  * page establishes, the plan they clicked, and how they got here.
  *
@@ -46,17 +89,18 @@ export default function AccountLink({
   children,
   className,
   style,
-}: Omit<AuthIntent, "attribution"> & {
+}: Omit<AuthIntent, "attribution" | "gaClientId"> & {
   action: "sign-in" | "sign-up";
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
 }) {
   const attribution = useAttribution();
+  const gaClientId = useGaClientId();
 
   return (
     <Link
-      href={authUrl(action, { orgType, plan, seats, attribution })}
+      href={authUrl(action, { orgType, plan, seats, attribution, gaClientId })}
       className={className}
       style={style}
     >
