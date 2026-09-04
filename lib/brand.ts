@@ -118,6 +118,13 @@ export type AuthIntent = {
   seats?: number;
   /** utm_* and click ids lifted off this page's own query string. */
   attribution?: Readonly<Record<string, string>>;
+  /**
+   * The funnel's GA4 client_id, read off the `_ga` cookie in the browser.
+   * Forwarded as `ga_cid` inside `next` so Insights adopts it and the
+   * marketing-to-checkout journey is one GA session across the two domains
+   * (the WorkOS redirect otherwise drops GA's own `_gl` linker).
+   */
+  gaClientId?: string;
 };
 
 const UPGRADE_PATH = "/upgrade";
@@ -145,6 +152,9 @@ function upgradeNext(intent: AuthIntent): string | null {
   for (const [key, value] of Object.entries(intent.attribution ?? {})) {
     params.set(key, value);
   }
+  // Same rule as attribution: carried only when a destination already exists,
+  // so it lands on `/upgrade` for Insights to stitch the GA session onto.
+  if (intent.gaClientId) params.set("ga_cid", intent.gaClientId);
   return `${UPGRADE_PATH}?${params}`;
 }
 
