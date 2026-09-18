@@ -119,7 +119,7 @@ export type AuthIntent = {
   /** utm_* and click ids lifted off this page's own query string. */
   attribution?: Readonly<Record<string, string>>;
   /**
-   * The funnel's GA4 client_id, read off the `_ga` cookie in the browser.
+   * The funnel's GA4 client_id, asked of gtag in the browser.
    * Forwarded as `ga_cid` inside `next` so Insights adopts it and the
    * marketing-to-checkout journey is one GA session across the two domains
    * (the WorkOS redirect otherwise drops GA's own `_gl` linker).
