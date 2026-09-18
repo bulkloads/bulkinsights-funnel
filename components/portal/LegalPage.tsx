@@ -1,4 +1,5 @@
 import Link from "next/link";
+import OffsiteLink from "@/components/portal/OffsiteLink";
 import { Eyebrow, SiteFooter, SiteHeader } from "@/components/portal/shared";
 import { brand } from "@/lib/brand";
 import { legalDocList, legalDocs, type LegalBlock, type LegalDocKey } from "@/lib/legal";
@@ -31,10 +32,11 @@ function linkify(text: string): Array<React.ReactNode> {
       // Keep trailing sentence punctuation out of the href and as plain text.
       const trailing = url.match(/[.,;]+$/)?.[0] ?? "";
       const href = url.slice(0, url.length - trailing.length);
+      // The URLs in the legal text are all BulkLoads pages, hence off-site.
       out.push(
-        <a key={key++} href={href} className={linkClass} style={linkStyle}>
+        <OffsiteLink key={key++} href={href} className={linkClass} style={linkStyle}>
           {href}
-        </a>,
+        </OffsiteLink>,
       );
       if (trailing) out.push(trailing);
     } else if (email) {

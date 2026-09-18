@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Phone } from "lucide-react";
 import AccountLink from "@/components/portal/AccountLink";
+import OffsiteLink from "@/components/portal/OffsiteLink";
 import BookingModal from "@/components/BookingModal";
 import Photo from "@/components/portal/Photo";
 import { brand, type OrgType } from "@/lib/brand";
@@ -339,13 +340,13 @@ export function SiteFooter({ orgType }: Intent = {}) {
                   </AccountLink>
                 </li>
                 <li>
-                  <a
+                  <OffsiteLink
                     href="https://www.bulkloads.com"
                     className="text-sm transition-colors duration-200 hover:text-white"
                     style={{ color: brand.textOnDark }}
                   >
                     BulkLoads.com
-                  </a>
+                  </OffsiteLink>
                 </li>
               </ul>
             </nav>
@@ -365,13 +366,13 @@ export function SiteFooter({ orgType }: Intent = {}) {
                   </Link>
                 </li>
                 <li>
-                  <a
+                  <OffsiteLink
                     href="https://www.bulkloads.com/sign_up/privacy_policy/"
                     className="text-sm transition-colors duration-200 hover:text-white"
                     style={{ color: brand.textOnDark }}
                   >
                     Privacy Policy
-                  </a>
+                  </OffsiteLink>
                 </li>
               </ul>
             </nav>

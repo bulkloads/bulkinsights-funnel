@@ -99,11 +99,44 @@ Two non-obvious details worth preserving:
 
 ## CTAs
 
-Sign in and Sign up, pointing at `v2.bulkloads.com/sign-in` and
-`/sign-up`. Both are defined once in `lib/brand.ts`.
+Sign in and Sign up go to Insights' front door,
+`insights.bulkloads.com/api/auth/sign-in` and `/sign-up`, which owns the
+WorkOS handoff. Both URLs are defined once in `lib/brand.ts`, and every
+control renders `components/portal/AccountLink.tsx`, which carries the
+visitor's org type, plan, campaign parameters and GA client id.
 
 **Never describe anything as free** anywhere in the product or the
 marketing pages.
+
+## Embedding
+
+BulkLoads serves this whole site inside a full-viewport iframe at
+`www.bulkloads.com/bulk-insights/`. Two rules follow, and nothing enforces
+them but the code that keeps them:
+
+- Internal navigation stays in the frame: plain `next/link`, no `target`.
+- Every link that leaves the site renders
+  `components/portal/OffsiteLink.tsx`, a plain `<a target="_top">`. The
+  sign-in handoff ends on WorkOS (`auth.bulkloads.com`), which sends
+  `frame-ancestors` and shows "refused to connect" inside a frame; the
+  footer's bulkloads.com links would otherwise render BulkLoads nested
+  inside its own page. Standalone, `_top` is the same window and changes
+  nothing.
+
+Consequences to know about:
+
+- A `_top` click needs the embedder's iframe to be unsandboxed, or to
+  grant `allow-top-navigation-by-user-activation`. The live embed has no
+  `sandbox`; if one is added without that flag the browser drops the click
+  silently, and there is no fallback on this side.
+- On sign-in or sign-up the whole tab leaves bulkloads.com. The embed's
+  `allow="payment"` goes unused, because checkout happens on Insights,
+  top-level.
+- The GA client id is asked of `gtag('get')` rather than read off the
+  `_ga` cookie, because in a cross-site frame Chrome and Safari hide that
+  cookie from script. See `AccountLink.tsx`.
+- The demo-booking widget (`links.bulkloads.com`, in `BookingModal.tsx`)
+  does not refuse framing, so it works nested inside the embed.
 
 ## Media status
 

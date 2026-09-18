@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import OffsiteLink from "@/components/portal/OffsiteLink";
 import { pickAttribution } from "@/lib/attribution";
 import { authUrl, type AuthIntent } from "@/lib/brand";
 
@@ -32,28 +32,53 @@ function useAttribution(): Record<string, string> {
 }
 
 /**
- * The funnel's GA4 client_id, read off the `_ga` cookie once GA has written it.
+ * The funnel's GA4 client_id, asked of gtag once it is up.
  *
- * Shared at module scope like the attribution above and resolved once per page.
- * Empty until GA's async script sets the cookie — a short poll covers that gap —
+ * Shared at module scope like the attribution above and resolved once per page,
  * so the href gains `ga_cid` well before anyone can click. Stays undefined when
- * GA is off (no NEXT_PUBLIC_GA_ID, so no cookie), and nothing is forwarded.
+ * GA is off (no NEXT_PUBLIC_GA_ID), and nothing is forwarded.
+ *
+ * `gtag('get')` rather than reading the `_ga` cookie. Inside the bulkloads.com
+ * embed this document is cross-site, and Chrome and Safari hide that cookie
+ * from script there — it would never turn up — while gtag still holds the id it
+ * is sending hits under, in memory when it cannot persist it. The command queues
+ * behind `config` and is answered whenever gtag.js finishes loading, so it needs
+ * no deadline; when GA is blocked it is never answered and nothing is forwarded,
+ * which is the same outcome the cookie gave.
+ *
+ * The `gtag` stub that queues the command is written by an inline script that
+ * runs after hydration, so it can be missing on the first effect. A short wait
+ * covers that gap, and a miss is not remembered: a link mounted later asks again.
  */
 let gaClientIdPromise: Promise<string | undefined> | null = null;
 
+type GtagWindow = Window & { gtag?: (...args: unknown[]) => void };
+
 function resolveGaClientId(): Promise<string | undefined> {
   gaClientIdPromise ??= new Promise((resolve) => {
-    if (!process.env.NEXT_PUBLIC_GA_ID) return resolve(undefined);
-    let tries = 0;
-    const read = () => {
-      // `_ga` is `GA1.<n>.<client_id>`, GA's client_id being the trailing
-      // `<int>.<int>`; matching that shape also validates it before it rides a URL.
-      const m = document.cookie.match(/(?:^|;\s*)_ga=GA\d+\.\d+\.(\d+\.\d+)/);
-      if (m) return resolve(m[1]);
-      if (++tries > 15) return resolve(undefined); // ~3s; GA never wrote a cookie
-      setTimeout(read, 200);
+    const gaId = process.env.NEXT_PUBLIC_GA_ID;
+    if (!gaId) return resolve(undefined);
+    // Async paths only: inside the executor the `??=` assignment has not
+    // happened yet, so clearing here would be overwritten.
+    const miss = () => {
+      gaClientIdPromise = null;
+      resolve(undefined);
     };
-    read();
+    let tries = 0;
+    const ask = () => {
+      const { gtag } = window as GtagWindow;
+      if (gtag) {
+        return gtag("get", gaId, "client_id", (id: unknown) => {
+          // GA's client_id is `<int>.<int>`; checking the shape also validates
+          // it before it rides a URL.
+          if (typeof id === "string" && /^\d+\.\d+$/.test(id)) resolve(id);
+          else miss();
+        });
+      }
+      if (++tries > 25) return miss(); // ~5s; the init script never ran
+      setTimeout(ask, 200);
+    };
+    ask();
   });
   return gaClientIdPromise;
 }
@@ -80,6 +105,10 @@ function useGaClientId(): string | undefined {
  *
  * Client-side because attribution only exists in the browser — this site is
  * statically rendered, so the server never sees the visitor's query string.
+ *
+ * An OffsiteLink, so that where this site is embedded the click takes the top
+ * window: the handoff is cross-origin and ends on a page that refuses to be
+ * framed.
  */
 export default function AccountLink({
   action,
@@ -99,12 +128,12 @@ export default function AccountLink({
   const gaClientId = useGaClientId();
 
   return (
-    <Link
+    <OffsiteLink
       href={authUrl(action, { orgType, plan, seats, attribution, gaClientId })}
       className={className}
       style={style}
     >
       {children}
-    </Link>
+    </OffsiteLink>
   );
 }
