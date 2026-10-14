@@ -264,3 +264,12 @@ body:has(.portal-scope) ::selection {
     display: none;
   }
 }
+
+/* The demo overlay's backdrop. A fade rather than a hard cut, because the
+   overlay opens on its own the moment someone starts the tour and an
+   un-announced full-screen flash reads as something going wrong. The
+   reduced-motion block above already collapses this to effectively nothing. */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

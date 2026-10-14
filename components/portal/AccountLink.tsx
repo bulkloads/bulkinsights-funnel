@@ -2,34 +2,8 @@
 
 import { useEffect, useState } from "react";
 import OffsiteLink from "@/components/portal/OffsiteLink";
-import { pickAttribution } from "@/lib/attribution";
+import { useLandingAttribution } from "@/components/portal/useLandingAttribution";
 import { authUrl, type AuthIntent } from "@/lib/brand";
-
-/**
- * The landing query string's campaign parameters, read once and kept for the
- * rest of the visit.
- *
- * Module scope rather than per-link state because the parameters belong to the
- * *arrival*, not to the page currently on screen. Someone who lands on
- * `/carriers?utm_source=…` and clicks through to `/brokers` has an internal
- * URL with no campaign on it by the time they reach a CTA, and re-reading the
- * location there would forget where they came from.
- */
-let landingAttribution: Record<string, string> | null = null;
-
-function useAttribution(): Record<string, string> {
-  // Empty for the server render and the first client render, so the markup
-  // matches and hydration is quiet; the real value arrives a tick later. The
-  // href is correct well before anybody can click it.
-  const [attribution, setAttribution] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    landingAttribution ??= pickAttribution(window.location.search);
-    if (Object.keys(landingAttribution).length > 0) setAttribution(landingAttribution);
-  }, []);
-
-  return attribution;
-}
 
 /**
  * The funnel's GA4 client_id, asked of gtag once it is up.
@@ -124,7 +98,7 @@ export default function AccountLink({
   className?: string;
   style?: React.CSSProperties;
 }) {
-  const attribution = useAttribution();
+  const attribution = useLandingAttribution();
   const gaClientId = useGaClientId();
 
   return (
