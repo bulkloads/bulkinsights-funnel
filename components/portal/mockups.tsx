@@ -21,17 +21,25 @@ import Image from "next/image";
  * declared width and a phone downloads the full-width rendition of a picture it
  * will draw at 350 CSS px.
  */
+/**
+ * The hero panel's width ceiling, exported because the panel no longer always
+ * holds a screenshot: the Storylane demo sits in the same column and has to
+ * stop at the same place. One definition, so the two cannot drift and leave
+ * the demo bleeding further past the container edge than the image did.
+ */
+export const HERO_PANEL_CAP = "lg:max-w-[760px]";
+
 const SLOTS = {
   /**
-   * The home hero panel: `lg:col-span-5` of the 12-column shell, bleeding past
+   * The home hero panel: `lg:col-span-6` of the 12-column shell, bleeding past
    * the container's right edge on a wide viewport. That bleed is why a
    * composition ceiling exists at all — the panel keeps growing with the
-   * window, and 640 is where the hero holds it. Scoped to `lg` because that is
+   * window, and 760 is where the hero holds it. Scoped to `lg` because that is
    * where the bleed and the two-column split begin; below it the panel is a
    * stacked full-width figure, exactly as it was when this class lived on the
    * wrapper in app/page.tsx.
    */
-  homeHero: { sizes: "(min-width: 1024px) 640px, 100vw", cap: "lg:max-w-[640px]" },
+  homeHero: { sizes: "(min-width: 1024px) 760px, 100vw", cap: HERO_PANEL_CAP },
   /**
    * A spotlight figure: `lg:col-span-7` beside its copy, in a `gap-x-14` grid.
    * That column tops out at ~668px inside the 1248px shell, so the composition

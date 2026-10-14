@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Photo from "@/components/portal/Photo";
 import AccountLink from "@/components/portal/AccountLink";
+import HeroDemo from "@/components/portal/HeroDemo";
 import HeroMedia from "@/components/portal/HeroMedia";
 import MarketTicker from "@/components/portal/MarketTicker";
 import {
@@ -12,7 +13,7 @@ import {
   SiteFooter,
   SiteHeader,
 } from "@/components/portal/shared";
-import { CommodityMockup, RatingMockup } from "@/components/portal/mockups";
+import { CommodityMockup } from "@/components/portal/mockups";
 import { brand } from "@/lib/brand";
 import { icpList } from "@/lib/icp";
 
@@ -79,11 +80,30 @@ export default function PortalPage() {
 
       <main id="main">
         {/* ── HERO ────────────────────────────────────────────
-            Asymmetric 7/5 split. The product panel is offset and
-            runs past the container edge rather than sitting in a
-            centred, symmetrical frame. */}
-        <section className="relative isolate overflow-hidden" style={{ background: brand.ink }}>
-          <div className="absolute inset-0 -z-10">
+            Even 6/6 split. It was 7/5 when the panel held a still
+            screenshot; the interactive demo has to be large enough
+            to read the UI inside it, so it takes the extra column.
+            The panel is still offset and bled past the container
+            edge rather than sitting in a centred, symmetrical
+            frame, which is what keeps the split from reading as a
+            plain two-up. */}
+        {/* No `isolate` here, and the background sits at z-0 with the content
+            above it rather than the background at -z-10.
+
+            `isolate` creates a stacking context, and everything inside one is
+            trapped in it: the demo's enlarged overlay could not rise above the
+            sticky header, which is a z-40 sibling of this whole section, no
+            matter what z-index it asked for. Ordering the two layers
+            explicitly inside the section gets the same result and leaves the
+            overlay free to stack against the page.
+
+            The content layers carry `relative` with NO z-index on purpose. A
+            positioned element with an explicit z-index starts a stacking
+            context of its own, which would trap the overlay just as `isolate`
+            did; `z-auto` does not, and positioned siblings paint in DOM order
+            anyway, so the content still sits above the z-0 background. */}
+        <section className="relative overflow-hidden" style={{ background: brand.ink }}>
+          <div className="absolute inset-0 z-0">
             <HeroMedia
               slot="homeHero"
               priority
@@ -91,9 +111,9 @@ export default function PortalPage() {
             />
           </div>
 
-          <div className="shell">
+          <div className="shell relative">
             <div className="grid items-center gap-x-12 gap-y-14 pb-20 pt-16 lg:grid-cols-12 lg:pb-24 lg:pt-20">
-              <div className="min-w-0 lg:col-span-7">
+              <div className="min-w-0 lg:col-span-6">
                 <Eyebrow onDark>Bulk Insights</Eyebrow>
 
                 <h1 className="t-display mt-6 text-[2.6rem] text-white sm:text-[3.5rem] lg:text-[4rem]">
@@ -125,20 +145,28 @@ export default function PortalPage() {
                 </div>
               </div>
 
-              {/* Offset downward and bled past the container edge. The
-                  screenshot's own ceiling holds it at the hero width; see
-                  the `homeHero` slot in mockups.tsx. This is the LCP image,
-                  hence `priority`. */}
-              <div className="min-w-0 lg:col-span-5 lg:translate-y-6">
+              {/* Offset downward and bled past the container edge, where the
+                  product screenshot used to sit. The panel keeps the same
+                  width ceiling it had then (HERO_PANEL_CAP in mockups.tsx);
+                  only its height changes, because the recording is a wider,
+                  shorter frame than the screenshot was. */}
+              {/* `mt`, not `translate-y`. A transform makes an element the
+                  containing block for every `position: fixed` descendant, so
+                  with `translate-y-6` here the demo's enlarged overlay and its
+                  backdrop were laid out against THIS column instead of the
+                  viewport, and the section's `overflow-hidden` then clipped
+                  them. A margin moves the panel the same 24px and creates no
+                  containing block. */}
+              <div className="min-w-0 lg:col-span-6 lg:mt-6">
                 <div className="bleed-right">
-                  <RatingMockup slot="homeHero" priority />
+                  <HeroDemo />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Stat strip: hairline-divided figures, not centred cards. */}
-          <div className="border-t" style={{ borderColor: "rgba(255,255,255,0.16)" }}>
+          <div className="relative border-t" style={{ borderColor: "rgba(255,255,255,0.16)" }}>
             <div className="shell">
               <dl className="grid grid-cols-1 divide-y sm:grid-cols-3 sm:divide-x sm:divide-y-0"
                 style={{ borderColor: "rgba(255,255,255,0.16)" }}>
