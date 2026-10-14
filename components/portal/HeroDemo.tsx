@@ -54,6 +54,25 @@ const ASPECT = LOGICAL_HEIGHT / LOGICAL_WIDTH;
 const EXPANDED_WIDTH = `min(92vw, ${LOGICAL_WIDTH}px, calc(86vh / ${ASPECT.toFixed(4)}))`;
 
 /**
+ * Where the scaling applies: the hero's own breakpoint, the one at which it
+ * stops stacking and the panel becomes a column beside the copy.
+ *
+ * Scaling a 1180px layout down is right on a desktop, where it buys the demo's
+ * full layout at a readable size. On a phone the panel is about 327px, which
+ * would be a scale of 0.28: the correct layout rendered far too small to read.
+ * Storylane has its own mobile handling, and below this breakpoint that is the
+ * better of two bad options, so the frame fills its box and lets the demo lay
+ * itself out for the space it actually has.
+ *
+ * Keyed to the breakpoint rather than to a panel width, which was the obvious
+ * thing to try and is wrong: below `lg` the hero stacks and the panel runs
+ * FULL WIDTH, so a 768px tablet gives it 689px while a 1024px desktop gives it
+ * 547px. No width threshold can separate those two, because the tablet's panel
+ * is the wider of the pair. The layout mode is the real distinction.
+ */
+const SCALED_LAYOUT = "(min-width: 1024px)";
+
+/**
  * The glow, as three alphas of `brand.orange` (243, 126, 33).
  *
  * Written as rgba literals rather than built from the token, because a token
@@ -81,11 +100,11 @@ type DemoEvent = {
 export default function HeroDemo() {
   const [expanded, setExpanded] = useState(false);
   /**
-   * How far the frame is scaled down to fit its box. Null until measured, so
-   * the frame is not painted at full 1180px for a frame or two before the
+   * How the frame is fitted to its box, and by how much. Null until measured,
+   * so the frame is not painted at full 1180px for a frame or two before the
    * first measurement lands.
    */
-  const [scale, setScale] = useState<number | null>(null);
+  const [fit, setFit] = useState<{ scaled: boolean; scale: number } | null>(null);
   const box = useRef<HTMLDivElement>(null);
   /**
    * Whether the demo has already enlarged itself once.
@@ -111,15 +130,43 @@ export default function HeroDemo() {
     const el = box.current;
     if (!el) return;
 
+    const query = window.matchMedia(SCALED_LAYOUT);
+    let frame = 0;
+    let attempts = 0;
+
     const measure = () => {
       const width = el.getBoundingClientRect().width;
-      if (width > 0) setScale(width / LOGICAL_WIDTH);
+
+      // A zero width means the panel is not laid out yet, which happens while
+      // the window is mid-resize and would happen for any hidden ancestor.
+      // Retry on the next frame rather than giving up: without this, a single
+      // zero reading left `fit` null for good, and a null fit renders the
+      // frame at opacity 0. The whole demo would simply never appear, which is
+      // exactly the failure this was caught doing.
+      //
+      // Bounded, because something permanently hidden would otherwise spin a
+      // frame loop forever. Giving up costs nothing: the observer below is
+      // still watching, and it fires when the panel does get a size.
+      if (width <= 0) {
+        if (attempts++ < 120) frame = requestAnimationFrame(measure);
+        return;
+      }
+
+      attempts = 0;
+      setFit({ scaled: query.matches, scale: width / LOGICAL_WIDTH });
     };
 
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
-    return () => observer.disconnect();
+    // The panel keeps its width across the breakpoint at some viewport sizes,
+    // so the resize observer alone would not notice the mode changing.
+    query.addEventListener("change", measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      query.removeEventListener("change", measure);
+    };
   }, []);
 
   useEffect(() => {
@@ -257,6 +304,12 @@ export default function HeroDemo() {
             role={expanded ? "dialog" : undefined}
             aria-label={expanded ? "Bulk Insights product tour" : undefined}
           >
+            {/* The size is corrected in a layout effect, which runs after this
+                element is in the DOM but before the browser paints, so the
+                frame is at its final size long before the demo's own script
+                has loaded and measured it. Mounting it straight away rather
+                than waiting for the measurement keeps the load starting as
+                early as possible, and it takes seconds to arrive. */}
             <iframe
               src={DEMO_SRC}
               title="Interactive tour of the Bulk Insights rating tool"
@@ -264,13 +317,17 @@ export default function HeroDemo() {
               className="absolute left-0 top-0"
               style={{
                 border: 0,
-                width: LOGICAL_WIDTH,
-                height: LOGICAL_HEIGHT,
-                transformOrigin: "0 0",
-                transform: `scale(${scale ?? 0})`,
+                ...(fit?.scaled
+                  ? {
+                      width: LOGICAL_WIDTH,
+                      height: LOGICAL_HEIGHT,
+                      transformOrigin: "0 0",
+                      transform: `scale(${fit.scale})`,
+                    }
+                  : { width: "100%", height: "100%" }),
                 // Hidden for the frame or two before the first measurement,
                 // rather than flashing at full size inside a smaller box.
-                opacity: scale === null ? 0 : 1,
+                opacity: fit === null ? 0 : 1,
                 transition: "opacity 150ms ease-out",
               }}
             />
