@@ -207,10 +207,30 @@ body:has(.portal-scope) ::selection {
 
 /* The hero product panel runs out toward the right edge of the viewport
    rather than stopping at the container. Pinned to the viewport so it
-   lands the same way at every width and never clips its own content. */
+   lands the same way at every width and never clips its own content.
+
+   Two things are cancelled, not one: the container's centring margin,
+   and the shell's own 32px padding. Cancelling only the first left the
+   panel stopping 32px short of the edge. Together they carry it right
+   to the viewport edge on a wide screen, which both widens it and moves
+   it further from the copy beside it.
+
+   The subtraction sits outside the max() on purpose. Below 1248px the
+   max() is already 0 and only the padding is given back, so the panel
+   reaches the shell's edge and no further, rather than overhanging the
+   viewport. Its glow is a box-shadow, which paints outside the element
+   without contributing to scroll width, so none of this can introduce
+   horizontal overflow.
+
+   16px of the shell's 32px padding is given back rather than all of it.
+   `100vw` counts the vertical scrollbar and the centring margin does
+   not, so cancelling the margin already overshoots by about half a
+   scrollbar; taking the full 32 on top put the panel's right edge
+   underneath the scrollbar. 16 leaves a real gutter on every platform,
+   whether the scrollbar is an overlay or takes up space. */
 @media (min-width: 1024px) {
   .bleed-right {
-    margin-right: calc(-1 * max(0px, (100vw - 1248px) / 2 - 16px));
+    margin-right: calc(-1 * max(0px, (100vw - 1248px) / 2) - 16px);
   }
 }
 

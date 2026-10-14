@@ -80,9 +80,13 @@ export default function PortalPage() {
 
       <main id="main">
         {/* ── HERO ────────────────────────────────────────────
-            Even 6/6 split. It was 7/5 when the panel held a still
-            screenshot; the interactive demo has to be large enough
-            to read the UI inside it, so it takes the extra column.
+            5/7 split, with the larger half going to the demo. It
+            was 7/5 when the panel held a still screenshot and 6/6
+            when the tour first went in; the tour has a whole app UI
+            inside it, and Storylane picks its layout from the frame
+            width it sees ON LOAD, so the panel's width is not only a
+            composition choice, it decides how cramped the demo
+            renders.
             The panel is still offset and bled past the container
             edge rather than sitting in a centred, symmetrical
             frame, which is what keeps the split from reading as a
@@ -113,10 +117,14 @@ export default function PortalPage() {
 
           <div className="shell relative">
             <div className="grid items-center gap-x-12 gap-y-14 pb-20 pt-16 lg:grid-cols-12 lg:pb-24 lg:pt-20">
-              <div className="min-w-0 lg:col-span-6">
+              <div className="min-w-0 lg:col-span-5">
                 <Eyebrow onDark>Bulk Insights</Eyebrow>
 
-                <h1 className="t-display mt-6 text-[2.6rem] text-white sm:text-[3.5rem] lg:text-[4rem]">
+                {/* The lg step is smaller than the xl one because the copy column
+                    is 5 of 12 from `lg` up: at 1024 the old 4rem broke this
+                    headline across six lines. Full size returns at xl, where
+                    the column is wide enough to carry it in four. */}
+                <h1 className="t-display mt-6 text-[2.6rem] text-white sm:text-[3.5rem] lg:text-[3.2rem] xl:text-[4rem]">
                   The market intelligence
                   <br />
                   <span style={{ color: brand.orange }}>bulk freight deserves.</span>
@@ -157,7 +165,7 @@ export default function PortalPage() {
                   viewport, and the section's `overflow-hidden` then clipped
                   them. A margin moves the panel the same 24px and creates no
                   containing block. */}
-              <div className="min-w-0 lg:col-span-6 lg:mt-6">
+              <div className="min-w-0 lg:col-span-7 lg:mt-6">
                 <div className="bleed-right">
                   <HeroDemo />
                 </div>
