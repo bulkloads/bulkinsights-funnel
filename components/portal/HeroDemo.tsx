@@ -71,9 +71,6 @@ export default function HeroDemo() {
    * a one-time offer, not a standing behaviour.
    */
   const hasAutoExpanded = useRef(false);
-  const closeButton = useRef<HTMLButtonElement>(null);
-  /** The control to hand focus back to, so closing does not dump it on <body>. */
-  const returnFocus = useRef<Element | null>(null);
 
   const close = useCallback(() => setExpanded(false), []);
 
@@ -107,7 +104,6 @@ export default function HeroDemo() {
 
       if (started && !hasAutoExpanded.current) {
         hasAutoExpanded.current = true;
-        returnFocus.current = document.activeElement;
         setExpanded(true);
         trackEvent("demo_expanded");
       }
@@ -131,16 +127,20 @@ export default function HeroDemo() {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    closeButton.current?.focus();
+    // Focus is deliberately left where it is, which is inside the demo.
+    //
+    // This opens because the visitor just clicked into the tour and is using
+    // it. Pulling focus out to a Close button would interrupt the very thing
+    // they started, and an earlier version that tried lost the race to the
+    // demo's own focus handling anyway. The cost is that Escape below only
+    // fires while focus is still on this page's own chrome: key events inside
+    // a cross-origin frame never reach us, and nothing on this side can
+    // change that. The Close button and the backdrop are the reliable ways
+    // out, and the button is in the tab order straight after the frame.
 
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = previousOverflow;
-      // Only steal focus back if it is still inside the overlay; if the
-      // visitor has since clicked somewhere else, leave them where they are.
-      if (closeButton.current?.contains(document.activeElement)) {
-        (returnFocus.current as HTMLElement | null)?.focus?.();
-      }
     };
   }, [expanded, close]);
 
@@ -204,8 +204,11 @@ export default function HeroDemo() {
                   }
                 : null),
             }}
+            // `role="dialog"` without `aria-modal`: the overlay is a dialog,
+            // but aria-modal would promise assistive technology that focus is
+            // held inside it and the rest of the page is inert, and this one
+            // traps nothing. Claiming it would be worse than not saying it.
             role={expanded ? "dialog" : undefined}
-            aria-modal={expanded ? true : undefined}
             aria-label={expanded ? "Bulk Insights product tour" : undefined}
           >
             <iframe
@@ -219,7 +222,6 @@ export default function HeroDemo() {
 
           {expanded && (
             <button
-              ref={closeButton}
               type="button"
               onClick={close}
               className="fixed right-5 top-5 z-[52] inline-flex items-center gap-2 px-4 py-2 text-[14px] font-medium transition-colors duration-200 hover:bg-white/10"
