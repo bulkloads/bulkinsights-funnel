@@ -29,13 +29,27 @@ type Size = keyof typeof sizing;
  * establishes one. Undefined on the home page, which knows nothing about the
  * visitor yet and must not guess — a wrong org type prices them wrongly.
  */
-type Intent = { orgType?: OrgType };
+type Intent = {
+  orgType?: OrgType;
+  /**
+   * A package key, where the page is selling one specific plan. It rides into
+   * sign-up the same way a plan card's does, so the picker on `/upgrade` opens
+   * on that plan instead of asking again.
+   *
+   * Undefined everywhere else, which is every page that sells the catalog
+   * rather than a single plan.
+   */
+  plan?: string;
+  seats?: number;
+};
 
-export function SignInButton({ size = "md", orgType }: { size?: Size } & Intent) {
+export function SignInButton({ size = "md", orgType, plan, seats }: { size?: Size } & Intent) {
   return (
     <AccountLink
       action="sign-in"
       orgType={orgType}
+      plan={plan}
+      seats={seats}
       className={`group inline-flex items-center justify-center gap-2 font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]}`}
       style={{
         background: brand.orange,
@@ -57,6 +71,8 @@ export function SignUpButton({
   onDark = false,
   filled = false,
   orgType,
+  plan,
+  seats,
 }: {
   size?: Size;
   onDark?: boolean;
@@ -72,6 +88,8 @@ export function SignUpButton({
       <AccountLink
         action="sign-up"
         orgType={orgType}
+        plan={plan}
+        seats={seats}
         className={`group inline-flex items-center justify-center gap-2 font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]}`}
         style={{
           background: brand.orange,
@@ -92,6 +110,8 @@ export function SignUpButton({
     <AccountLink
       action="sign-up"
       orgType={orgType}
+      plan={plan}
+      seats={seats}
       className={`inline-flex items-center justify-center border font-medium tracking-[-0.01em] transition-colors duration-200 ${sizing[size]} ${
         onDark ? "text-white hover:bg-white/10" : "hover:bg-black/[0.04]"
       }`}
@@ -116,6 +136,8 @@ export function CtaPair({
   onDark = false,
   align = "left",
   orgType,
+  plan,
+  seats,
 }: {
   size?: Size;
   onDark?: boolean;
@@ -128,8 +150,8 @@ export function CtaPair({
           align === "center" ? "justify-center" : ""
         }`}
       >
-        <SignInButton size={size} orgType={orgType} />
-        <SignUpButton size={size} onDark={onDark} orgType={orgType} />
+        <SignInButton size={size} orgType={orgType} plan={plan} seats={seats} />
+        <SignUpButton size={size} onDark={onDark} orgType={orgType} plan={plan} seats={seats} />
       </div>
       <p
         className={`mt-4 text-[13px] ${align === "center" ? "text-center" : ""}`}
@@ -394,6 +416,8 @@ export function ClosingCta({
   title = "Price it with confidence.",
   body = "Tighter margins, rising costs, and a market that won't sit still. Put 14 years of settled bulk freight behind your next quote.",
   orgType,
+  plan,
+  seats,
 }: {
   title?: string;
   body?: string;
@@ -419,7 +443,7 @@ export function ClosingCta({
             {body}
           </p>
           <div className="mt-9">
-            <CtaPair onDark orgType={orgType} />
+            <CtaPair onDark orgType={orgType} plan={plan} seats={seats} />
           </div>
           <p className="mt-6 text-sm" style={{ color: brand.textOnDarkMuted }}>
             Prefer a walkthrough first?{" "}

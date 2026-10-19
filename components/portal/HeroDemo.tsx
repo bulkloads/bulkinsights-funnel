@@ -15,7 +15,11 @@ import { brand } from "@/lib/brand";
  * exactly what the share page puts in its own iframe.
  */
 const DEMO_ORIGIN = "https://demo.storylane.com";
-const DEMO_SRC = `${DEMO_ORIGIN}/demo/qo334gt7wy2e?embed=inline`;
+
+/** The rating-tool tour, used wherever no other demo is named. */
+export const RATING_TOUR = "qo334gt7wy2e";
+
+const demoSrc = (id: string) => `${DEMO_ORIGIN}/demo/${id}?embed=inline`;
 
 /**
  * The size the frame is ALWAYS laid out at, whatever space it occupies.
@@ -97,7 +101,15 @@ type DemoEvent = {
   step?: { index?: unknown };
 };
 
-export default function HeroDemo() {
+export default function HeroDemo({
+  /** Storylane demo id, so a page can embed a tour of its own subject. */
+  demoId = RATING_TOUR,
+  /** Overrides the frame's accessible name where the tour is not the rating tool. */
+  title = "Interactive tour of the Bulk Insights rating tool",
+}: {
+  demoId?: string;
+  title?: string;
+} = {}) {
   const [expanded, setExpanded] = useState(false);
   /**
    * How the frame is fitted to its box, and by how much. Null until measured,
@@ -302,7 +314,7 @@ export default function HeroDemo() {
             // held inside it and the rest of the page is inert, and this one
             // traps nothing. Claiming it would be worse than not saying it.
             role={expanded ? "dialog" : undefined}
-            aria-label={expanded ? "Bulk Insights product tour" : undefined}
+            aria-label={expanded ? title : undefined}
           >
             {/* The size is corrected in a layout effect, which runs after this
                 element is in the DOM but before the browser paints, so the
@@ -311,8 +323,8 @@ export default function HeroDemo() {
                 than waiting for the measurement keeps the load starting as
                 early as possible, and it takes seconds to arrive. */}
             <iframe
-              src={DEMO_SRC}
-              title="Interactive tour of the Bulk Insights rating tool"
+              src={demoSrc(demoId)}
+              title={title}
               allow="fullscreen"
               className="absolute left-0 top-0"
               style={{
