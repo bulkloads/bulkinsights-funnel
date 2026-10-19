@@ -16,8 +16,35 @@ import { brand } from "@/lib/brand";
  */
 const DEMO_ORIGIN = "https://demo.storylane.com";
 
+/**
+ * A Storylane recording, with the shape Storylane publishes for it.
+ *
+ * `framePercent` is per recording, not a constant: it is the height of the
+ * recorded frame as a percentage of its width, read from the `padding-bottom`
+ * in the embed snippet on that demo's own share page. Two tours of the same
+ * product differ here (47.45 against 47.03), and using one tour's figure for
+ * another letterboxes or crops it, so each one carries its own.
+ */
+export type StorylaneTour = {
+  id: string;
+  framePercent: number;
+  /** Accessible name for the frame; says which tour it is. */
+  title: string;
+};
+
 /** The rating-tool tour, used wherever no other demo is named. */
-export const RATING_TOUR = "qo334gt7wy2e";
+export const RATING_TOUR: StorylaneTour = {
+  id: "qo334gt7wy2e",
+  framePercent: 47.45,
+  title: "Interactive tour of the Bulk Insights rating tool",
+};
+
+/** Corridor Carriers: finding who already runs a lane. */
+export const CORRIDOR_CARRIERS_TOUR: StorylaneTour = {
+  id: "kiox3a6zbeng",
+  framePercent: 47.03,
+  title: "Interactive tour of Corridor Carriers in Bulk Insights",
+};
 
 const demoSrc = (id: string) => `${DEMO_ORIGIN}/demo/${id}?embed=inline`;
 
@@ -40,22 +67,14 @@ const demoSrc = (id: string) => `${DEMO_ORIGIN}/demo/${id}?embed=inline`;
  * small-screen one, and because it is the width the enlarged overlay tops out
  * at, which puts the expanded demo at a scale of almost exactly 1.
  *
- * The height is the recorded frame (47.45% of width) plus Storylane's own 25px
- * control bar. The bar is a fixed height in the demo's own coordinate space; it
- * scales with everything else, which is why it is folded into the ratio here
- * rather than added separately as it had to be when the frame was resized.
+ * The height is the recorded frame plus Storylane's own 25px control bar. The
+ * bar is a fixed height in the demo's own coordinate space; it scales with
+ * everything else, which is why it is folded into the ratio rather than added
+ * separately as it had to be when the frame was resized. The frame's own share
+ * of that height comes from the tour, because it differs between recordings.
  */
 const LOGICAL_WIDTH = 1180;
-const LOGICAL_HEIGHT = Math.round(LOGICAL_WIDTH * 0.4745 + 25);
-const ASPECT = LOGICAL_HEIGHT / LOGICAL_WIDTH;
-
-/**
- * The enlarged size. Width is whichever of three limits binds first: most of
- * the viewport width, the logical width (past which scaling up would only
- * soften the picture for no extra detail), and the width at which the height
- * would overflow the viewport.
- */
-const EXPANDED_WIDTH = `min(92vw, ${LOGICAL_WIDTH}px, calc(86vh / ${ASPECT.toFixed(4)}))`;
+const CONTROL_BAR_PX = 25;
 
 /**
  * Where the scaling applies: the hero's own breakpoint, the one at which it
@@ -102,14 +121,24 @@ type DemoEvent = {
 };
 
 export default function HeroDemo({
-  /** Storylane demo id, so a page can embed a tour of its own subject. */
-  demoId = RATING_TOUR,
-  /** Overrides the frame's accessible name where the tour is not the rating tool. */
-  title = "Interactive tour of the Bulk Insights rating tool",
+  /** Which recording to embed, so a page can show a tour of its own subject. */
+  tour = RATING_TOUR,
 }: {
-  demoId?: string;
-  title?: string;
+  tour?: StorylaneTour;
 } = {}) {
+  // Derived per tour rather than module constants, because the frame's shape
+  // is a property of the recording. Cheap enough to recompute each render.
+  const logicalHeight = Math.round(
+    (LOGICAL_WIDTH * tour.framePercent) / 100 + CONTROL_BAR_PX,
+  );
+  const aspect = logicalHeight / LOGICAL_WIDTH;
+  /**
+   * The enlarged size. Width is whichever of three limits binds first: most of
+   * the viewport width, the logical width (past which scaling up would only
+   * soften the picture for no extra detail), and the width at which the height
+   * would overflow the viewport.
+   */
+  const expandedWidth = `min(92vw, ${LOGICAL_WIDTH}px, calc(86vh / ${aspect.toFixed(4)}))`;
   const [expanded, setExpanded] = useState(false);
   /**
    * How the frame is fitted to its box, and by how much. Null until measured,
@@ -268,7 +297,7 @@ export default function HeroDemo({
             does not shift as the demo arrives, and it keeps holding the column
             open while the demo is enlarged. The ratio is the frame's own,
             control bar included, because the bar scales with the rest. */}
-        <div className="relative h-0" style={{ paddingBottom: `${(ASPECT * 100).toFixed(3)}%` }}>
+        <div className="relative h-0" style={{ paddingBottom: `${(aspect * 100).toFixed(3)}%` }}>
           {/* THE IFRAME IS NEVER RE-PARENTED AND NEVER RESIZED. Enlarging
               changes this element's position and size; the frame inside keeps
               its 1180px layout and is scaled to match. Re-parenting an iframe
@@ -304,8 +333,8 @@ export default function HeroDemo({
               ].join(", "),
               ...(expanded
                 ? {
-                    width: EXPANDED_WIDTH,
-                    height: `calc(${EXPANDED_WIDTH} * ${ASPECT.toFixed(4)})`,
+                    width: expandedWidth,
+                    height: `calc(${expandedWidth} * ${aspect.toFixed(4)})`,
                   }
                 : null),
             }}
@@ -314,7 +343,7 @@ export default function HeroDemo({
             // held inside it and the rest of the page is inert, and this one
             // traps nothing. Claiming it would be worse than not saying it.
             role={expanded ? "dialog" : undefined}
-            aria-label={expanded ? title : undefined}
+            aria-label={expanded ? tour.title : undefined}
           >
             {/* The size is corrected in a layout effect, which runs after this
                 element is in the DOM but before the browser paints, so the
@@ -323,8 +352,8 @@ export default function HeroDemo({
                 than waiting for the measurement keeps the load starting as
                 early as possible, and it takes seconds to arrive. */}
             <iframe
-              src={demoSrc(demoId)}
-              title={title}
+              src={demoSrc(tour.id)}
+              title={tour.title}
               allow="fullscreen"
               className="absolute left-0 top-0"
               style={{
@@ -332,7 +361,7 @@ export default function HeroDemo({
                 ...(fit?.scaled
                   ? {
                       width: LOGICAL_WIDTH,
-                      height: LOGICAL_HEIGHT,
+                      height: logicalHeight,
                       transformOrigin: "0 0",
                       transform: `scale(${fit.scale})`,
                     }
