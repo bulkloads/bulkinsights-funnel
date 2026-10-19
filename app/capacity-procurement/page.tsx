@@ -1,23 +1,16 @@
 import type { Metadata } from "next";
-import { ArrowRight, Radar, FileSpreadsheet, Grid2x2, Truck } from "lucide-react";
-import AccountLink from "@/components/portal/AccountLink";
+import { Radar, FileSpreadsheet, Grid2x2, Truck } from "lucide-react";
+import BookingModal from "@/components/BookingModal";
 import HeroDemo from "@/components/portal/HeroDemo";
 import {
   ClosingCta,
+  CtaPair,
   Eyebrow,
   SiteFooter,
   SiteHeader,
 } from "@/components/portal/shared";
-import { brand, type OrgType } from "@/lib/brand";
-import { loadPlans } from "@/lib/insights-plans";
-import type { AssertRevalidateMatches } from "@/lib/insights-plans";
-import {
-  DEFAULT_SEATS,
-  entryRate,
-  formatUsdCents,
-  plansFor,
-  tiersFor,
-} from "@/lib/plans";
+import { brand } from "@/lib/brand";
+import { DEFAULT_SEATS } from "@/lib/plans";
 
 export const metadata: Metadata = {
   title: "Capacity Procurement | Bulk Insights",
@@ -25,38 +18,8 @@ export const metadata: Metadata = {
     "Find carriers, run an RFP, and see where equipment actually sits. Capacity procurement for bulk freight, priced against 14 years of settled shipments.",
 };
 
-/**
- * Same window as the pricing and ICP pages, and for the same reason: the
- * prices are fetched from Insights at build time, so the page has to expire
- * with its data or it advertises a stale number.
- *
- * Written as a literal because Next reads it by static analysis.
- */
-export const revalidate = 3600;
-type _RevalidateMatchesFetch = AssertRevalidateMatches<typeof revalidate>;
-
 /** The package this whole page sells, and the one its CTAs carry into sign-up. */
 const PLAN_KEY = "pricing_analytics_procurement";
-
-/**
- * Who it is sold to, in the order the page presents them.
- *
- * Carriers are absent because the plan has no carrier price: capacity
- * procurement is something brokers and shippers buy, and a carrier arriving
- * here would be shown a product they cannot purchase.
- */
-const BUYERS: ReadonlyArray<{ orgType: OrgType; label: string; line: string }> = [
-  {
-    orgType: "broker",
-    label: "Brokers",
-    line: "Cover the freight you just won without starting from a blank search.",
-  },
-  {
-    orgType: "shipper",
-    label: "Shippers",
-    line: "Run a bid you can defend, and know who can actually haul it.",
-  },
-];
 
 /**
  * The four capabilities the plan adds on top of Pricing and Analytics, in the
@@ -92,16 +55,19 @@ const CAPABILITIES = [
 ] as const;
 
 /**
- * A landing page for capacity procurement: the tour, what the plan does, and
- * the price, with every control carrying the package into sign-up.
+ * A landing page for capacity procurement: the tour and what the plan does,
+ * with every control carrying the package into sign-up.
+ *
+ * No prices. The page sells the capability and hands the visitor to sign-up or
+ * to sales, and the plan is sold at a different rate to a broker than to a
+ * shipper, so a single figure here would be wrong for one of them and the pair
+ * of figures was a pricing table on a page that is not the pricing page.
  *
  * Deliberately not in the primary nav. The nav sells by WHO you are, and this
  * page sells one capability to two of those audiences, so it belongs on the end
  * of a campaign or an email rather than beside Carriers, Brokers and Shippers.
  */
-export default async function Page() {
-  const { plans: catalog } = await loadPlans();
-
+export default function Page() {
   return (
     <div className="portal-scope min-h-screen bg-white" style={{ color: brand.ink }}>
       <a href="#main" className="skip-link">
@@ -127,34 +93,17 @@ export default async function Page() {
                   out to bid against a number you can defend.
                 </p>
 
-                <div className="mt-9 flex flex-col items-start gap-4">
-                  <AccountLink
-                    action="sign-up"
-                    plan={PLAN_KEY}
-                    seats={DEFAULT_SEATS}
-                    className="group inline-flex items-center justify-center gap-2 px-8 py-4 text-[17px] font-medium tracking-[-0.01em] transition-colors duration-200"
-                    style={{
-                      background: brand.orange,
-                      color: brand.ink,
-                      borderRadius: brand.radiusButton,
-                    }}
-                  >
-                    Get Capacity Procurement
-                    <ArrowRight
-                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                      strokeWidth={2.5}
-                    />
-                  </AccountLink>
-                  <p className="text-[14px]" style={{ color: brand.textOnDarkMuted }}>
-                    Already a BulkLoads member?{" "}
-                    <AccountLink
-                      action="sign-in"
-                      plan={PLAN_KEY}
-                      className="font-medium underline underline-offset-2"
-                      style={{ color: brand.orange }}
-                    >
-                      Sign in
-                    </AccountLink>
+                {/* The standard pair, carrying the package so sign-up lands
+                    on this plan rather than asking again, and a third door for
+                    someone who would rather talk to a person than start an
+                    account. */}
+                <div className="mt-9">
+                  <CtaPair onDark plan={PLAN_KEY} seats={DEFAULT_SEATS} />
+                  <p className="mt-6 text-sm" style={{ color: brand.textOnDarkMuted }}>
+                    Buying for a team, or want it walked through first?{" "}
+                    <span className="inline-block align-middle">
+                      <BookingModal variant="portalLink" label="Talk to sales" />
+                    </span>
                   </p>
                 </div>
               </div>
@@ -179,7 +128,12 @@ export default async function Page() {
               <p className="t-lead mt-5" style={{ color: brand.textBody }}>
                 Capacity Procurement sits on top of Pricing and Analytics, so the
                 benchmark you price against and the carriers you source from come
-                from the same settled freight.
+                from the same settled freight. It is sold to brokers and
+                shippers; carriers are priced on the plans at{" "}
+                <a href="/pricing" className="underline underline-offset-2">
+                  our pricing page
+                </a>
+                .
               </p>
             </div>
 
@@ -198,76 +152,6 @@ export default async function Page() {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section className="py-24 lg:py-28">
-          <div className="shell">
-            <div className="max-w-2xl">
-              <Eyebrow>Pricing</Eyebrow>
-              <h2 className="t-h2 mt-6 text-[2.25rem] sm:text-[2.75rem]">
-                Priced for who you are
-              </h2>
-              <p className="t-lead mt-5" style={{ color: brand.textBody }}>
-                The same plan is sold at a different rate to a broker and to a
-                shipper, because the freight each one is sourcing is different.
-                Per user, per month.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-5 sm:grid-cols-2">
-              {BUYERS.map(({ orgType, label, line }) => {
-                const plan = plansFor(orgType, catalog).find((p) => p.key === PLAN_KEY);
-                const tiers = plan ? tiersFor(plan, orgType) : null;
-                const rate = tiers ? entryRate(tiers) : null;
-
-                return (
-                  <div
-                    key={orgType}
-                    className="flex flex-col border bg-white p-7"
-                    style={{ borderColor: brand.border, borderRadius: brand.radiusCard }}
-                  >
-                    <h3 className="t-h3 text-[17px]">{label}</h3>
-                    <p className="t-body mt-2 text-[14px]" style={{ color: brand.textBody }}>
-                      {line}
-                    </p>
-
-                    <div className="mt-6 flex items-baseline gap-1.5">
-                      <span className="tabular text-[2.25rem] font-bold leading-none">
-                        {rate === null ? "--" : formatUsdCents(rate)}
-                      </span>
-                      <span className="text-[13px]" style={{ color: brand.textMuted }}>
-                        per user each month
-                      </span>
-                    </div>
-
-                    <AccountLink
-                      action="sign-up"
-                      orgType={orgType}
-                      plan={PLAN_KEY}
-                      seats={DEFAULT_SEATS}
-                      className="mt-7 inline-flex w-full items-center justify-center px-5 py-3 text-[14px] font-medium tracking-[-0.01em] transition-colors duration-200"
-                      style={{
-                        background: brand.orange,
-                        color: brand.ink,
-                        borderRadius: brand.radiusButton,
-                      }}
-                    >
-                      Get started
-                    </AccountLink>
-                  </div>
-                );
-              })}
-            </div>
-
-            <p className="mt-8 text-[13px]" style={{ color: brand.textMuted }}>
-              Carriers do not buy capacity procurement; see{" "}
-              <a href="/pricing" className="underline underline-offset-2">
-                the full pricing page
-              </a>{" "}
-              for the plans sold to carriers, and for the larger-team rates on
-              every plan.
-            </p>
           </div>
         </section>
 
