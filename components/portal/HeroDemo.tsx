@@ -27,6 +27,8 @@ const DEMO_ORIGIN = "https://demo.storylane.com";
  */
 export type StorylaneTour = {
   id: string;
+  /** Short slug for analytics, so events read as the tour and not an opaque id. */
+  key: string;
   framePercent: number;
   /** Accessible name for the frame; says which tour it is. */
   title: string;
@@ -35,6 +37,7 @@ export type StorylaneTour = {
 /** The rating-tool tour, used wherever no other demo is named. */
 export const RATING_TOUR: StorylaneTour = {
   id: "qo334gt7wy2e",
+  key: "rating",
   framePercent: 47.45,
   title: "Interactive tour of the Bulk Insights rating tool",
 };
@@ -42,6 +45,7 @@ export const RATING_TOUR: StorylaneTour = {
 /** Corridor Carriers: finding who already runs a lane. */
 export const CORRIDOR_CARRIERS_TOUR: StorylaneTour = {
   id: "kiox3a6zbeng",
+  key: "corridor-carriers",
   framePercent: 47.03,
   title: "Interactive tour of Corridor Carriers in Bulk Insights",
 };
@@ -228,7 +232,12 @@ export default function HeroDemo({
       // unconditionally produced "demo_demo_engaged_25" in the analytics
       // dashboards, so the prefix is only added where it is missing.
       if (!UNTRACKED_EVENTS.has(name)) {
-        trackEvent(name.startsWith("demo") ? name : `demo_${name}`);
+        // Tagged with the tour: both the home page and the procurement page
+        // emit these, and without it `demo_primary_cta` cannot say which
+        // recording somebody actually started.
+        trackEvent(name.startsWith("demo") ? name : `demo_${name}`, {
+          tour: tour.key,
+        });
       }
 
       // "They started the tour, or moved past its first step." Step index is
@@ -241,7 +250,7 @@ export default function HeroDemo({
       if (started && !hasAutoExpanded.current) {
         hasAutoExpanded.current = true;
         setExpanded(true);
-        trackEvent("demo_expanded");
+        trackEvent("demo_expanded", { tour: tour.key });
       }
     }
 

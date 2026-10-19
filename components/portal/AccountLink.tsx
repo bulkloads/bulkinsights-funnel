@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import OffsiteLink from "@/components/portal/OffsiteLink";
+import { trackEvent } from "@/lib/analytics";
 import { useLandingAttribution } from "@/components/portal/useLandingAttribution";
 import { authUrl, type AuthIntent } from "@/lib/brand";
 
@@ -100,10 +102,31 @@ export default function AccountLink({
 }) {
   const attribution = useLandingAttribution();
   const gaClientId = useGaClientId();
+  const pathname = usePathname();
 
   return (
     <OffsiteLink
       href={authUrl(action, { orgType, plan, seats, attribution, gaClientId })}
+      /**
+       * Every account control on the site reports the same event, because
+       * this component is the one place they all go through. Analytics would
+       * otherwise have nothing at all for them: the links point at
+       * insights.bulkloads.com, which is in GA4's Configure domains for
+       * cross-domain linking, and a click on a configured domain is
+       * deliberately NOT an outbound_click. Enhanced Measurement therefore
+       * never fires for exactly the clicks that matter most.
+       *
+       * Fire and navigate, without waiting: both providers send over
+       * `sendBeacon`, which survives the page going away.
+       */
+      onClick={() =>
+        trackEvent("cta_click", {
+          action,
+          page: pathname ?? "unknown",
+          ...(orgType ? { org_type: orgType } : null),
+          ...(plan ? { plan } : null),
+        })
+      }
       className={className}
       style={style}
     >

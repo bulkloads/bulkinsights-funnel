@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { trackEvent } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 
 type Variant = "default" | "header" | "hero" | "portalLink";
@@ -29,6 +31,19 @@ export default function BookingModal({
 }) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
+
+  /**
+   * Opening the calendar is the one measurable step of the sales route, and
+   * the only one this site can see: the booking itself happens inside the
+   * embedded scheduler, on another origin, which tells us nothing. So this
+   * counts intent to talk to someone, not a booked meeting, and the name says
+   * `opened` rather than `booked` so nobody reads it as the latter.
+   */
+  const openCalendar = () => {
+    trackEvent("booking_opened", { page: pathname ?? "unknown", variant });
+    setOpen(true);
+  };
 
   useEffect(() => setMounted(true), []);
 
@@ -48,7 +63,7 @@ export default function BookingModal({
   const trigger =
     variant === "portalLink" ? (
       <button
-        onClick={() => setOpen(true)}
+        onClick={openCalendar}
         className="font-semibold underline underline-offset-2 transition-colors"
         style={{ color: accent }}
       >
@@ -56,7 +71,7 @@ export default function BookingModal({
       </button>
     ) : variant === "header" ? (
       <button
-        onClick={() => setOpen(true)}
+        onClick={openCalendar}
         className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all hover:-translate-y-px"
         style={{ background: "#f47d01", color: "#0c1d2b", boxShadow: "0 4px 14px rgba(244,125,1,0.35)" }}
       >
@@ -65,7 +80,7 @@ export default function BookingModal({
       </button>
     ) : variant === "hero" ? (
       <button
-        onClick={() => setOpen(true)}
+        onClick={openCalendar}
         className="inline-flex items-center gap-2 font-bold text-sm px-6 py-3.5 rounded-xl transition-all hover:-translate-y-0.5"
         style={{ background: "#f47d01", color: "#0c1d2b", boxShadow: "0 8px 24px rgba(244,125,1,0.35)" }}
       >
@@ -75,7 +90,7 @@ export default function BookingModal({
       </button>
     ) : (
       <button
-        onClick={() => setOpen(true)}
+        onClick={openCalendar}
         className="group w-full inline-flex items-center justify-center gap-2 px-8 py-5 rounded-xl font-bold text-base transition-all hover:-translate-y-0.5"
         style={{ background: "#f47d01", color: "#0c1d2b", boxShadow: "0 8px 32px rgba(244,125,1,0.3)" }}
       >
