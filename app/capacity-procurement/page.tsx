@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Radar, FileSpreadsheet, Grid2x2, Truck } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
-import HeroDemo from "@/components/portal/HeroDemo";
+import HeroDemo, { CORRIDOR_CARRIERS_TOUR } from "@/components/portal/HeroDemo";
 import {
   ClosingCta,
   CtaPair,
@@ -108,10 +108,13 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* The tour, in the same panel treatment the home hero uses. */}
+              {/* The Corridor Carriers tour, in the same panel treatment the
+                  home hero uses. A page selling capacity procurement shows the
+                  procurement product; the home page's rating tour would be
+                  demonstrating something this page does not sell. */}
               <div className="min-w-0 lg:col-span-7 lg:mt-6">
                 <div className="bleed-right">
-                  <HeroDemo title="Interactive tour of Bulk Insights" />
+                  <HeroDemo tour={CORRIDOR_CARRIERS_TOUR} />
                 </div>
               </div>
             </div>
