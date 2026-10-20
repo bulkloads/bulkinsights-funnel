@@ -8,7 +8,24 @@ import { usePathname } from "next/navigation";
 import { trackEvent, trackMeta } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 
+declare global {
+  interface Window {
+    BulkCRMBook?: { mount: () => void };
+  }
+}
+
 type Variant = "default" | "header" | "hero" | "portalLink";
+
+/**
+ * BulkCRM's booking widget, and the calendar it should show.
+ *
+ * The script derives the iframe's origin from its OWN src, so this URL decides
+ * which deployment of BulkCRM the calendar is served from as well as where the
+ * script comes from. Moving the calendar to its own domain later is a change
+ * to this one line.
+ */
+const WIDGET_SRC = "https://bulk-crm.vercel.app/widget/book.js";
+const CALENDAR = "insights";
 
 export default function BookingModal({
   variant = "default",
@@ -49,6 +66,17 @@ export default function BookingModal({
   };
 
   useEffect(() => setMounted(true), []);
+
+  // The widget mounts marked elements as they appear, via its own
+  // MutationObserver, which covers this modal arriving in a portal after the
+  // script has loaded. This is the belt to that braces: the widget also
+  // exposes a manual mount, and calling it on open means a browser without
+  // MutationObserver, or an observer that missed the insertion, still gets a
+  // calendar rather than an empty white panel.
+  useEffect(() => {
+    if (!open) return;
+    window.BulkCRMBook?.mount();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -146,22 +174,17 @@ export default function BookingModal({
               </div>
             </div>
 
+            {/* BulkCRM's widget turns this div into the booking iframe and
+                keeps its height in step with its content over postMessage, so
+                nothing here sets a height: the old embed was pinned at 820px
+                and either clipped the calendar or left a band of white under
+                it depending on the step. */}
             <div className="flex-1 overflow-y-auto bg-white">
-              <iframe
-                src="https://links.bulkloads.com/widget/booking/UzE0ZL169iih4haYPiob"
-                style={{ width: "100%", border: "none" }}
-                scrolling="yes"
-                id="UzE0ZL169iih4haYPiob_1775840431013"
-                className="w-full h-[820px]"
-                title="Book a Bulk Insights demo"
-              />
+              <div data-bulkcrm-book={CALENDAR} />
             </div>
           </div>
 
-          <Script
-            src="https://links.bulkloads.com/js/form_embed.js"
-            strategy="afterInteractive"
-          />
+          <Script src={WIDGET_SRC} strategy="afterInteractive" />
         </div>
   );
 
