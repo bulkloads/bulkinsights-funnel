@@ -20,6 +20,7 @@ import { track as vercelTrack } from "@vercel/analytics";
 declare global {
   interface Window {
     gtag?: (command: "event", name: string, params?: Record<string, unknown>) => void;
+    fbq?: (command: string, name: string, params?: Record<string, unknown>) => void;
   }
 }
 
@@ -36,5 +37,26 @@ export function trackEvent(name: string, props: Props = {}): void {
     window.gtag?.("event", name, props);
   } catch {
     /* Same. */
+  }
+}
+
+/**
+ * A Meta standard event.
+ *
+ * Separate from `trackEvent` rather than a third sink inside it, because the
+ * two systems do not take the same vocabulary. GA4 is happy with any snake
+ * case name this site invents; Meta optimises ad delivery against a fixed set
+ * of standard events, and an invented name is a custom event it cannot
+ * optimise for. So the mapping from "what happened" to "what Meta calls it"
+ * is made deliberately at each call site instead of by a rule here.
+ *
+ * Wrapped like the rest: a blocked pixel must never be why somebody fails to
+ * reach sign-up.
+ */
+export function trackMeta(event: string, props: Props = {}): void {
+  try {
+    window.fbq?.("track", event, props);
+  } catch {
+    /* Analytics is never worth breaking a click over. */
   }
 }

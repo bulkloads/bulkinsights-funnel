@@ -125,6 +125,18 @@ export type AuthIntent = {
    * (the WorkOS redirect otherwise drops GA's own `_gl` linker).
    */
   gaClientId?: string;
+  /**
+   * Meta's browser id and click id, read from the `_fbp` and `_fbc` cookies
+   * the pixel sets on THIS domain.
+   *
+   * Forwarded for the same reason as `gaClientId`, and it matters more here.
+   * The purchase happens on Insights, on another domain, which cannot read a
+   * cookie set on this one; without these the Conversions API event Insights
+   * sends for a purchase has no way to be joined to the ad click that
+   * produced it, so Meta can neither attribute the sale nor learn from it.
+   */
+  fbp?: string;
+  fbc?: string;
 };
 
 const UPGRADE_PATH = "/upgrade";
@@ -155,6 +167,10 @@ function upgradeNext(intent: AuthIntent): string | null {
   // Same rule as attribution: carried only when a destination already exists,
   // so it lands on `/upgrade` for Insights to stitch the GA session onto.
   if (intent.gaClientId) params.set("ga_cid", intent.gaClientId);
+  // Same rule again: carried only when there is a destination to carry them
+  // to, so they land on `/upgrade` for Insights to attach to its Purchase.
+  if (intent.fbp) params.set("fbp", intent.fbp);
+  if (intent.fbc) params.set("fbc", intent.fbc);
   return `${UPGRADE_PATH}?${params}`;
 }
 
