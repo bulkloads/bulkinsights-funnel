@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Script from "next/script";
 import { ArrowUpRight, Calendar, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackMeta } from "@/lib/analytics";
 import { brand } from "@/lib/brand";
 
 type Variant = "default" | "header" | "hero" | "portalLink";
@@ -42,6 +42,9 @@ export default function BookingModal({
    */
   const openCalendar = () => {
     trackEvent("booking_opened", { page: pathname ?? "unknown", variant });
+    // Meta's standard event for a sales enquiry. Someone opening the calendar
+    // is the closest thing to a lead this site can actually observe.
+    trackMeta("Lead", { content_category: "demo_request" });
     setOpen(true);
   };
 

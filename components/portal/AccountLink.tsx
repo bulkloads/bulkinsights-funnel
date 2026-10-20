@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import OffsiteLink from "@/components/portal/OffsiteLink";
-import { trackEvent } from "@/lib/analytics";
+import { trackEvent, trackMeta } from "@/lib/analytics";
 import { useLandingAttribution } from "@/components/portal/useLandingAttribution";
 import { authUrl, type AuthIntent } from "@/lib/brand";
 
@@ -76,6 +76,53 @@ function useGaClientId(): string | undefined {
 }
 
 /**
+ * Meta's `_fbp` and `_fbc`, read straight off this domain's cookies.
+ *
+ * Plain `document.cookie` rather than asking the pixel, because unlike gtag
+ * Meta exposes no accessor for them, and unlike GA inside the bulkloads.com
+ * embed these are readable here: they are first-party cookies on the document
+ * doing the reading.
+ */
+function metaCookies(): { fbp?: string; fbc?: string } {
+  if (typeof document === "undefined") return {};
+  const read = (name: string) =>
+    document.cookie
+      .split("; ")
+      .find((row) => row.startsWith(`${name}=`))
+      ?.slice(name.length + 1);
+  return { fbp: read("_fbp"), fbc: read("_fbc") };
+}
+
+/**
+ * Those cookies, polled until they appear.
+ *
+ * `_fbp` is written by the pixel a moment AFTER it loads, and the pixel loads
+ * `afterInteractive`, so a single read on mount reliably runs too early and
+ * finds nothing: the cookie is there seconds later and the link has already
+ * gone out without it. Bounded at about five seconds, after which the visitor
+ * almost certainly has no pixel, blocked or opted out, and there is nothing
+ * left to wait for.
+ */
+function useMetaCookies(): { fbp?: string; fbc?: string } {
+  const [cookies, setCookies] = useState<{ fbp?: string; fbc?: string }>({});
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let tries = 0;
+    const look = () => {
+      const found = metaCookies();
+      if (found.fbp || found.fbc) return setCookies(found);
+      if (++tries > 25) return;
+      timer = setTimeout(look, 200);
+    };
+    look();
+    return () => clearTimeout(timer);
+  }, []);
+
+  return cookies;
+}
+
+/**
  * A link to sign-in or sign-up carrying the visitor's intent: the org type the
  * page establishes, the plan they clicked, and how they got here.
  *
@@ -102,11 +149,20 @@ export default function AccountLink({
 }) {
   const attribution = useLandingAttribution();
   const gaClientId = useGaClientId();
+  const { fbp, fbc } = useMetaCookies();
   const pathname = usePathname();
 
   return (
     <OffsiteLink
-      href={authUrl(action, { orgType, plan, seats, attribution, gaClientId })}
+      href={authUrl(action, {
+        orgType,
+        plan,
+        seats,
+        attribution,
+        gaClientId,
+        fbp,
+        fbc,
+      })}
       /**
        * Every account control on the site reports the same event, because
        * this component is the one place they all go through. Analytics would
@@ -119,14 +175,28 @@ export default function AccountLink({
        * Fire and navigate, without waiting: both providers send over
        * `sendBeacon`, which survives the page going away.
        */
-      onClick={() =>
+      onClick={() => {
         trackEvent("cta_click", {
           action,
           page: pathname ?? "unknown",
           ...(orgType ? { org_type: orgType } : null),
           ...(plan ? { plan } : null),
-        })
-      }
+        });
+        // Meta's nearest standard event to "has left for the checkout". Sent
+        // for sign-up only: a sign-in is a returning member, not new purchase
+        // intent, and feeding those to delivery optimisation teaches it to go
+        // and find people who already pay us.
+        //
+        // No `value` here on purpose. Value belongs on Purchase, where a real
+        // amount is known; an invented one at this step would be optimised
+        // against and would not match what Insights eventually reports.
+        if (action === "sign-up") {
+          trackMeta("InitiateCheckout", {
+            content_category: "subscription",
+            ...(plan ? { content_name: plan } : null),
+          });
+        }
+      }}
       className={className}
       style={style}
     >
