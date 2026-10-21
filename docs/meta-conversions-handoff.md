@@ -31,7 +31,20 @@ handoff forwards exactly one thing: `next`. Everything below is inside it.
 | `fbc` | Meta click id (`_fbc` cookie), present only when the visitor arrived from a Meta ad |
 
 Attribution is also written onto the auth URL itself, but **only `next`
-survives the WorkOS redirect**. Read from `next`.
+survives the WorkOS redirect**. Read campaign attribution from `next`.
+
+**`fbp` and `fbc` are the exception: they are on the auth URL itself as well.**
+`next` is only built when the page knows a plan or an org type, which is true
+of the ICP and procurement pages and false of the home page, the header and
+the footer. Since those are the busiest sign-up controls on the site, read
+`fbp` and `fbc` from **both** places and prefer whichever is present:
+
+```
+/api/auth/sign-up?fbp=...&fbc=...&next=%2Fupgrade%3F...%26fbp%3D...%26fbc%3D...
+```
+
+A sign-up from the home page carries them on the auth URL and has no `next` at
+all. Reading only from `next` would lose the majority of ad-driven signups.
 
 `fbp` and `fbc` are first-party cookies on `bulkfreightinsights.com`. Insights
 cannot read them, which is the entire reason they are forwarded. They are the

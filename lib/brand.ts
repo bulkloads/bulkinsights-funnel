@@ -134,6 +134,12 @@ export type AuthIntent = {
    * cookie set on this one; without these the Conversions API event Insights
    * sends for a purchase has no way to be joined to the ad click that
    * produced it, so Meta can neither attribute the sale nor learn from it.
+   *
+   * Written in BOTH places: inside `next`, and on the auth URL itself. Unlike
+   * campaign attribution, which is only interesting once there is a
+   * destination to carry it to, these have to survive a sign-up from a page
+   * that establishes no plan and no org type, which is most of the site's
+   * traffic.
    */
   fbp?: string;
   fbc?: string;
@@ -193,6 +199,21 @@ export function authUrl(
   for (const [key, value] of Object.entries(intent.attribution ?? {})) {
     params.set(key, value);
   }
+  // Meta's ids go on the auth URL ITSELF, not only inside `next`.
+  //
+  // `next` is built only when the page knows a plan or an org type, which is
+  // true of the ICP and procurement pages and false of the home page, the
+  // header and the footer. Those are the highest-traffic sign-up controls on
+  // the site, and leaving the ids inside `next` meant somebody arriving from
+  // a Meta ad, landing on the home page and pressing Sign up reached Insights
+  // with nothing to attribute the eventual purchase to.
+  //
+  // They are exempt from the "only once there is a destination" rule that
+  // governs attribution above, because they are not a destination or an
+  // intent: they identify the browser that clicked the ad, which is worth
+  // forwarding whether or not this page knows what the visitor came to buy.
+  if (intent.fbp) params.set("fbp", intent.fbp);
+  if (intent.fbc) params.set("fbc", intent.fbc);
   const query = params.toString();
   return query ? `${base}?${query}` : base;
 }
