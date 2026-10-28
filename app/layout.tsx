@@ -21,6 +21,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrains.variable}`}>
+      <head>
+        {/*
+          The hero's product tour is served from this origin and is the
+          slowest thing on the page: the frame has been measured taking four
+          and a half seconds just to respond. Opening the connection while the
+          rest of the page is still parsing takes the DNS lookup, TCP
+          handshake and TLS negotiation off that critical path.
+
+          `preconnect` rather than `prefetch`: the document itself cannot be
+          fetched ahead of time, since the iframe asks for it with its own
+          credentials and headers. The connection is the part worth having
+          ready.
+        */}
+        <link rel="preconnect" href="https://demo.storylane.com" />
+        <link rel="dns-prefetch" href="https://demo.storylane.com" />
+      </head>
       <body className="font-sans bg-navy-950 text-navy-50 antialiased">
         {children}
         <Analytics />
