@@ -30,6 +30,15 @@ export type StorylaneTour = {
   /** Short slug for analytics, so events read as the tour and not an opaque id. */
   key: string;
   framePercent: number;
+  /**
+   * A still of this tour's opening frame, shown while the demo loads.
+   *
+   * Optional: without one the panel falls back to a skeleton of the app's
+   * chrome, which is better than the empty box but says less. Any still must
+   * be the same shape as the frame, or the handover from poster to live demo
+   * visibly jumps.
+   */
+  poster?: string;
   /** Accessible name for the frame; says which tour it is. */
   title: string;
 };
@@ -38,6 +47,7 @@ export type StorylaneTour = {
 export const RATING_TOUR: StorylaneTour = {
   id: "qo334gt7wy2e",
   key: "rating",
+  poster: "/media/tour-poster-rating.jpg",
   framePercent: 47.45,
   title: "Interactive tour of the Bulk Insights rating tool",
 };
@@ -150,6 +160,21 @@ export default function HeroDemo({
    * first measurement lands.
    */
   const [fit, setFit] = useState<{ scaled: boolean; scale: number } | null>(null);
+  /**
+   * Whether the demo's own frame has finished loading.
+   *
+   * The frame is a third party that regularly takes ten to twenty seconds to
+   * paint, and until it does an iframe is simply blank. Reserving its space
+   * without filling it left the hero showing an empty glowing box for that
+   * whole time, which reads as broken rather than as loading, so the poster
+   * below holds the space and this hands over to the live demo when it is
+   * genuinely ready.
+   *
+   * `onLoad` fires when the frame's document has loaded, which is close
+   * enough: the gap between that and first paint is a fraction of the wait it
+   * is covering.
+   */
+  const [frameReady, setFrameReady] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   /**
    * Whether the demo has already enlarged itself once.
@@ -354,6 +379,25 @@ export default function HeroDemo({
             role={expanded ? "dialog" : undefined}
             aria-label={expanded ? tour.title : undefined}
           >
+            {/* Behind the frame, holding the panel until the demo paints.
+                Not `hidden` once ready: it stays in place and the frame fades
+                over it, so there is no moment of empty panel between the two,
+                and it is the thing a visitor sees if the demo never arrives
+                at all because Storylane is down or blocked. */}
+            <div className="absolute inset-0" aria-hidden="true">
+              {tour.poster ? (
+                <img
+                  src={tour.poster}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="eager"
+                  decoding="async"
+                />
+              ) : (
+                <TourSkeleton />
+              )}
+            </div>
+
             {/* The size is corrected in a layout effect, which runs after this
                 element is in the DOM but before the browser paints, so the
                 frame is at its final size long before the demo's own script
@@ -364,6 +408,7 @@ export default function HeroDemo({
               src={demoSrc(tour.id)}
               title={tour.title}
               allow="fullscreen"
+              onLoad={() => setFrameReady(true)}
               className="absolute left-0 top-0"
               style={{
                 border: 0,
@@ -375,10 +420,12 @@ export default function HeroDemo({
                       transform: `scale(${fit.scale})`,
                     }
                   : { width: "100%", height: "100%" }),
-                // Hidden for the frame or two before the first measurement,
-                // rather than flashing at full size inside a smaller box.
-                opacity: fit === null ? 0 : 1,
-                transition: "opacity 150ms ease-out",
+                // Hidden until BOTH the scale is known and the demo has
+                // loaded: before the measurement it would flash at full size
+                // inside a smaller box, and before the load it is a blank
+                // rectangle sitting over a perfectly good poster.
+                opacity: fit === null || !frameReady ? 0 : 1,
+                transition: "opacity 300ms ease-out",
               }}
             />
           </div>
@@ -401,5 +448,66 @@ export default function HeroDemo({
         </div>
       </div>
     </>
+  );
+}
+
+/**
+ * A stand-in for the app's chrome, for a tour with no poster of its own.
+ *
+ * Deliberately abstract rather than a fake screenshot: it reads as something
+ * arriving, which is true, where invented UI would be a claim about the
+ * product that happens to be false. Pure CSS, so it is crisp at every size
+ * and costs no request on the one panel that is already waiting on one.
+ */
+function TourSkeleton() {
+  return (
+    <div className="flex h-full w-full flex-col" style={{ background: "#1c1c2b" }}>
+      {/* Window bar, the one part of the real frame worth echoing: it is what
+          makes the panel read as an application rather than a blank card. */}
+      <div
+        className="flex shrink-0 items-center gap-1.5 px-3"
+        style={{ height: "7%", background: "rgba(255,255,255,0.06)" }}
+      >
+        {["rgba(255,255,255,0.22)", "rgba(255,255,255,0.16)", "rgba(255,255,255,0.12)"].map(
+          (tone) => (
+            <span
+              key={tone}
+              className="rounded-full"
+              style={{ width: 6, height: 6, background: tone }}
+            />
+          ),
+        )}
+      </div>
+
+      <div className="flex min-h-0 flex-1">
+        <div
+          className="hidden shrink-0 flex-col gap-2 p-3 sm:flex"
+          style={{ width: "18%", background: "rgba(255,255,255,0.03)" }}
+        >
+          {[70, 52, 60, 44, 56].map((w, i) => (
+            <span
+              key={i}
+              className="rounded"
+              style={{ width: `${w}%`, height: 5, background: "rgba(255,255,255,0.09)" }}
+            />
+          ))}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-3 p-4">
+          <span
+            className="rounded"
+            style={{ width: "38%", height: 8, background: "rgba(255,255,255,0.12)" }}
+          />
+          <span
+            className="rounded"
+            style={{ width: "62%", height: 5, background: "rgba(255,255,255,0.07)" }}
+          />
+          <div
+            className="mt-2 flex-1 rounded-lg"
+            style={{ background: "rgba(255,255,255,0.04)" }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
